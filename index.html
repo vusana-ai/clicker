@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>용사 키우기 — 클릭 훈련 RPG</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans KR', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    canvas {
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-slate-900/70 backdrop-blur px-4 py-3">
+    <div class="max-w-3xl mx-auto flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 font-extrabold text-sm border border-amber-500/30">⚔️</span>
+        <div class="min-w-0">
+          <h1 class="text-sm sm:text-base font-bold tracking-tight truncate">용사 키우기</h1>
+          <p class="text-[11px] text-slate-400 truncate">클릭할수록 강해지는 성장형 훈련 게임</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <button id="soundToggleBtn" type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition">
+          🔊 소리 켜짐
+        </button>
+        <button id="resetOpenBtn" type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-rose-950/70 hover:text-rose-300 border border-slate-700 hover:border-rose-700/60 text-slate-300 transition">
+          초기화
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-3xl w-full mx-auto px-4 py-4 flex flex-col gap-4">
+    <!-- Top Status Card -->
+    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-lg">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <div class="flex items-center gap-2.5">
+          <span id="levelBadge" class="px-3 py-1 rounded-full text-sm font-extrabold bg-amber-500 text-slate-950">Lv. 1</span>
+          <span id="rankTitle" class="text-sm sm:text-base font-bold text-amber-300">초보 수련생</span>
+        </div>
+        <div class="text-xs sm:text-sm font-semibold text-slate-300">
+          다음 레벨까지 <span id="remainingClicks" class="text-emerald-400 font-bold">100</span>회 클릭
+        </div>
+      </div>
+
+      <!-- Training Progress Bar -->
+      <div class="w-full bg-slate-800 rounded-full h-4 overflow-hidden border border-slate-700/80 relative">
+        <div id="progressBar" class="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400 transition-all duration-100" style="width: 0%"></div>
+      </div>
+      <div class="flex justify-between items-center mt-1.5 text-xs text-slate-400">
+        <span>훈련도: <strong id="progressText" class="text-slate-200">0 / 100</strong></span>
+        <span id="progressPercent" class="font-semibold text-emerald-400">0%</span>
+      </div>
+    </section>
+
+    <!-- Game Canvas Arena -->
+    <section class="relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl flex-1 min-h-[280px] sm:min-h-[340px] flex flex-col">
+      <div id="canvasContainer" class="relative flex-1 w-full min-h-[260px]">
+        <canvas id="gameCanvas" class="block w-full h-full cursor-pointer"></canvas>
+        <!-- Level Up Toast -->
+        <div id="levelUpBanner" class="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-amber-500/95 text-slate-950 font-extrabold text-sm shadow-lg opacity-0 transition-opacity duration-300 whitespace-nowrap">
+          🎉 LEVEL UP! 강해졌습니다!
+        </div>
+      </div>
+
+      <!-- Primary Action Button -->
+      <div class="p-3 bg-slate-950/70 border-t border-slate-800/80 flex items-center justify-between gap-3">
+        <button id="trainBtn" type="button" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-[0.98] text-slate-950 font-extrabold text-sm sm:text-base shadow-md transition">
+          💪 클릭하여 훈련하기 (+1)
+        </button>
+        <div class="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 px-2 shrink-0">
+          <kbd class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono">Space</kbd>
+          <span>단축키</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Grid -->
+    <section class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3">
+        <div class="text-[11px] text-slate-400 font-medium">전투력 (CP)</div>
+        <div id="statPower" class="text-lg font-extrabold text-amber-400 mt-0.5">100</div>
+      </div>
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3">
+        <div class="text-[11px] text-slate-400 font-medium">공격력 (ATK)</div>
+        <div id="statAtk" class="text-lg font-extrabold text-rose-400 mt-0.5">15</div>
+      </div>
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3">
+        <div class="text-[11px] text-slate-400 font-medium">체력 (HP)</div>
+        <div id="statHp" class="text-lg font-extrabold text-emerald-400 mt-0.5">120</div>
+      </div>
+      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3">
+        <div class="text-[11px] text-slate-400 font-medium">누적 훈련 클릭</div>
+        <div id="statTotalClicks" class="text-lg font-extrabold text-sky-400 mt-0.5">0</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- In-page Reset Modal -->
+  <div id="resetModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-5 shadow-2xl">
+      <h2 class="text-base font-bold text-slate-100">훈련 기록을 초기화할까요?</h2>
+      <p class="text-xs sm:text-sm text-slate-400 mt-1.5">현재 레벨과 누적 클릭 수가 1레벨 상태로 되돌아갑니다.</p>
+      <div class="mt-4 flex justify-end gap-2">
+        <button id="resetCancelBtn" type="button" class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition">취소</button>
+        <button id="resetConfirmBtn" type="button" class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white transition">초기화하기</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = 'hero_clicker_save_v1';
+
+      const RANKS = [
+        '초보 수련생',
+        '견습 검사',
+        '숙련 전사',
+        '정예 기사',
+        '왕국 수호자',
+        '소드 마스터',
+        '전설의 영웅',
+        '신화의 용사'
+      ];
+
+      let state = {
+        level: 1,
+        clicksInLevel: 0,
+        totalClicks: 0,
+        soundEnabled: true
+      };
+
+      // Visual animation state
+      let bounceScale = 1;
+      let auraPulse = 0;
+      let particles = [];
+      let floatingTexts = [];
+      let audioCtx = null;
+      let bannerTimer = null;
+
+      // DOM refs
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+      const canvasContainer = document.getElementById('canvasContainer');
+      const levelBadge = document.getElementById('levelBadge');
+      const rankTitle = document.getElementById('rankTitle');
+      const remainingClicks = document.getElementById('remainingClicks');
+      const progressBar = document.getElementById('progressBar');
+      const progressText = document.getElementById('progressText');
+      const progressPercent = document.getElementById('progressPercent');
+      const statPower = document.getElementById('statPower');
+      const statAtk = document.getElementById('statAtk');
+      const statHp = document.getElementById('statHp');
+      const statTotalClicks = document.getElementById('statTotalClicks');
+      const trainBtn = document.getElementById('trainBtn');
+      const soundToggleBtn = document.getElementById('soundToggleBtn');
+      const levelUpBanner = document.getElementById('levelUpBanner');
+      const resetModal = document.getElementById('resetModal');
+      const resetOpenBtn = document.getElementById('resetOpenBtn');
+      const resetCancelBtn = document.getElementById('resetCancelBtn');
+      const resetConfirmBtn = document.getElementById('resetConfirmBtn');
+
+      function getTargetClicks(level) {
+        return level * 100;
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (typeof parsed.level === 'number' && parsed.level >= 1) {
+              state.level = parsed.level;
+              state.clicksInLevel = Math.max(0, Number(parsed.clicksInLevel) || 0);
+              state.totalClicks = Math.max(0, Number(parsed.totalClicks) || 0);
+              state.soundEnabled = parsed.soundEnabled !== false;
+            }
+          }
+        } catch (e) {
+          // Ignore storage errors in restricted environments
+        }
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {
+          // Ignore storage errors
+        }
+      }
+
+      function ensureAudio() {
+        if (!state.soundEnabled) return null;
+        if (!audioCtx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) {
+            audioCtx = new AudioCtx();
+          }
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
+        return audioCtx;
+      }
+
+      function playClickSound() {
+        const ac = ensureAudio();
+        if (!ac) return;
+        const now = ac.currentTime;
+        const osc = ac.createOscillator();
+        const gain = ac.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(340 + Math.min(state.level * 25, 300), now);
+        osc.frequency.exponentialRampToValueAtTime(160, now + 0.06);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        osc.connect(gain);
+        gain.connect(ac.destination);
+        osc.start(now);
+        osc.stop(now + 0.065);
+      }
+
+      function playLevelUpSound() {
+        const ac = ensureAudio();
+        if (!ac) return;
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((freq, idx) => {
+          const now = ac.currentTime + idx * 0.07;
+          const osc = ac.createOscillator();
+          const gain = ac.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+          osc.connect(gain);
+          gain.connect(ac.destination);
+          osc.start(now);
+          osc.stop(now + 0.23);
+        });
+      }
+
+      function showLevelUpBanner() {
+        levelUpBanner.textContent = '🎉 LEVEL UP! Lv. ' + state.level + ' 달성!';
+        levelUpBanner.classList.remove('opacity-0');
+        levelUpBanner.classList.add('opacity-100');
+        if (bannerTimer) clearTimeout(bannerTimer);
+        bannerTimer = setTimeout(() => {
+          levelUpBanner.classList.remove('opacity-100');
+          levelUpBanner.classList.add('opacity-0');
+        }, 1600);
+      }
+
+      function spawnEffects(x, y, isLevelUp) {
+        const count = isLevelUp ? 28 : 7;
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = (isLevelUp ? 3.5 : 1.8) + Math.random() * 3;
+          particles.push({
+            x,
+            y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 1.2,
+            life: 1,
+            size: isLevelUp ? 4 + Math.random() * 4 : 2.5 + Math.random() * 2.5,
+            color: isLevelUp ? '#fbbf24' : '#34d399'
+          });
+        }
+        floatingTexts.push({
+          x: x + (Math.random() - 0.5) * 30,
+          y: y - 20,
+          text: isLevelUp ? 'LEVEL UP!' : '+1 훈련',
+          life: 1,
+          color: isLevelUp ? '#fbbf24' : '#6ee7b7',
+          size: isLevelUp ? 18 : 14
+        });
+      }
+
+      function performTrain(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        let fx = rect.width / 2;
+        let fy = rect.height / 2 - 15;
+        if (typeof clientX === 'number' && typeof clientY === 'number') {
+          fx = clientX - rect.left;
+          fy = clientY - rect.top;
+        }
+
+        state.clicksInLevel += 1;
+        state.totalClicks += 1;
+        bounceScale = 0.86;
+
+        const target = getTargetClicks(state.level);
+        let leveledUp = false;
+        if (state.clicksInLevel >= target) {
+          state.clicksInLevel -= target;
+          state.level += 1;
+          leveledUp = true;
+          playLevelUpSound();
+          showLevelUpBanner();
+        } else {
+          playClickSound();
+        }
+
+        spawnEffects(fx, fy, leveledUp);
+        updateUI();
+        saveState();
+      }
+
+      function updateUI() {
+        const target = getTargetClicks(state.level);
+        const pct = Math.min(100, Math.floor((state.clicksInLevel / target) * 100));
+        const remain = Math.max(0, target - state.clicksInLevel);
+        const rankIdx = Math.min(state.level - 1, RANKS.length - 1);
+
+        levelBadge.textContent = 'Lv. ' + state.level;
+        rankTitle.textContent = RANKS[rankIdx];
+        remainingClicks.textContent = remain.toLocaleString();
+        progressBar.style.width = pct + '%';
+        progressText.textContent = state.clicksInLevel.toLocaleString() + ' / ' + target.toLocaleString();
+        progressPercent.textContent = pct + '%';
+
+        const atk = 15 + (state.level - 1) * 22 + Math.floor(state.totalClicks * 0.15);
+        const hp = 120 + (state.level - 1) * 140 + Math.floor(state.totalClicks * 0.5);
+        const cp = atk * 4 + hp;
+
+        statAtk.textContent = atk.toLocaleString();
+        statHp.textContent = hp.toLocaleString();
+        statPower.textContent = cp.toLocaleString();
+        statTotalClicks.textContent = state.totalClicks.toLocaleString();
+
+        soundToggleBtn.textContent = state.soundEnabled ? '🔊 소리 켜짐' : '🔇 음소거';
+      }
+
+      function resizeCanvas() {
+        const rect = canvasContainer.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+        canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function drawCharacter(cx, cy) {
+        const lv = state.level;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.scale(bounceScale, 2 - bounceScale);
+
+        // Aura for Lv.2+
+        if (lv >= 2) {
+          const auraRadius = 64 + Math.sin(auraPulse) * 6 + Math.min(lv * 4, 24);
+          const grad = ctx.createRadialGradient(0, -10, 15, 0, -10, auraRadius);
+          const auraColor = lv >= 5 ? 'rgba(251, 191, 36, 0.35)' : lv >= 3 ? 'rgba(56, 189, 248, 0.30)' : 'rgba(52, 211, 153, 0.25)';
+          grad.addColorStop(0, auraColor);
+          grad.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(0, -10, auraRadius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Cape for Lv.3+
+        if (lv >= 3) {
+          ctx.fillStyle = lv >= 5 ? '#b91c1c' : '#2563eb';
+          ctx.beginPath();
+          ctx.moveTo(-24, -6);
+          ctx.lineTo(-38, 44);
+          ctx.lineTo(38, 44);
+          ctx.lineTo(24, -6);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.beginPath();
+        ctx.ellipse(0, 52, 34, 9, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Body / Armor
+        const armorColor = lv >= 5 ? '#f59e0b' : lv >= 3 ? '#38bdf8' : lv >= 2 ? '#10b981' : '#64748b';
+        ctx.fillStyle = armorColor;
+        ctx.beginPath();
+        ctx.roundRect(-24, -8, 48, 52, 12);
+        ctx.fill();
+
+        // Chest emblem
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(0, 14, 7, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Head
+        ctx.fillStyle = '#fde68a';
+        ctx.beginPath();
+        ctx.arc(0, -30, 24, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Headband / Helmet
+        ctx.fillStyle = lv >= 4 ? '#f59e0b' : '#ef4444';
+        ctx.fillRect(-24, -44, 48, 9);
+
+        // Crown for Lv.5+
+        if (lv >= 5) {
+          ctx.fillStyle = '#fbbf24';
+          ctx.beginPath();
+          ctx.moveTo(-14, -48);
+          ctx.lineTo(-10, -62);
+          ctx.lineTo(0, -52);
+          ctx.lineTo(10, -62);
+          ctx.lineTo(14, -48);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        // Eyes
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(-8, -28, 3, 0, Math.PI * 2);
+        ctx.arc(8, -28, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Weapon (scales with level)
+        const swordLen = 36 + Math.min(lv * 8, 40);
+        ctx.save();
+        ctx.translate(30, 12);
+        ctx.rotate(-0.45);
+        // Handle
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(-3, 0, 6, 14);
+        // Guard
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillRect(-9, -4, 18, 5);
+        // Blade
+        ctx.fillStyle = lv >= 4 ? '#fef08a' : '#e2e8f0';
+        ctx.beginPath();
+        ctx.moveTo(-4, -4);
+        ctx.lineTo(0, -swordLen);
+        ctx.lineTo(4, -4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        ctx.restore();
+      }
+
+      function renderLoop() {
+        const w = canvasContainer.clientWidth;
+        const h = canvasContainer.clientHeight;
+        ctx.clearRect(0, 0, w, h);
+
+        // Background subtle grid/floor
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+        bgGrad.addColorStop(0, '#0f172a');
+        bgGrad.addColorStop(1, '#1e293b');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        // Training ground platform
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.08)';
+        ctx.beginPath();
+        ctx.ellipse(w / 2, h / 2 + 54, 110, 22, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        bounceScale += (1 - bounceScale) * 0.18;
+        auraPulse += 0.06;
+
+        drawCharacter(w / 2, h / 2);
+
+        // Update & draw particles
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.12;
+          p.life -= 0.03;
+          if (p.life <= 0) {
+            particles.splice(i, 1);
+            continue;
+          }
+          ctx.globalAlpha = p.life;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        // Update & draw floating text
+        for (let i = floatingTexts.length - 1; i >= 0; i--) {
+          const ft = floatingTexts[i];
+          ft.y -= 1.2;
+          ft.life -= 0.025;
+          if (ft.life <= 0) {
+            floatingTexts.splice(i, 1);
+            continue;
+          }
+          ctx.globalAlpha = ft.life;
+          ctx.fillStyle = ft.color;
+          ctx.font = 'bold ' + ft.size + 'px Inter, Noto Sans KR, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(ft.text, ft.x, ft.y);
+        }
+        ctx.globalAlpha = 1;
+
+        requestAnimationFrame(renderLoop);
+      }
+
+      // Event Listeners
+      canvas.addEventListener('pointerdown', (e) => {
+        performTrain(e.clientX, e.clientY);
+      });
+
+      trainBtn.addEventListener('click', () => {
+        const rect = canvas.getBoundingClientRect();
+        performTrain(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && !e.repeat && resetModal.classList.contains('hidden')) {
+          e.preventDefault();
+          const rect = canvas.getBoundingClientRect();
+          performTrain(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        }
+      });
+
+      soundToggleBtn.addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled;
+        updateUI();
+        saveState();
+      });
+
+      resetOpenBtn.addEventListener('click', () => {
+        resetModal.classList.remove('hidden');
+      });
+
+      resetCancelBtn.addEventListener('click', () => {
+        resetModal.classList.add('hidden');
+      });
+
+      resetConfirmBtn.addEventListener('click', () => {
+        state.level = 1;
+        state.clicksInLevel = 0;
+        state.totalClicks = 0;
+        resetModal.classList.add('hidden');
+        updateUI();
+        saveState();
+      });
+
+      window.addEventListener('resize', resizeCanvas);
+
+      window.onload = function () {
+        loadState();
+        updateUI();
+        resizeCanvas();
+        requestAnimationFrame(renderLoop);
+      };
+    })();
+  </script>
+</body>
+</html>
