@@ -4,12 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="용사 키우기" />
-  <link id="dynamicFavicon" rel="icon" type="image/png" />
-  <link id="dynamicAppleIcon" rel="apple-touch-icon" />
-  <link id="dynamicManifest" rel="manifest" />
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3408/3408506.png" />
+  <link rel="manifest" href="./manifest.json" />
   <title>용사 키우기 — 클릭 훈련 RPG</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -198,36 +194,25 @@
       <div id="regionsPanel" class="hidden grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
     </section>
 
-    <!-- 스마트폰 바탕화면 아이콘 만들기 카드 (게임 최하단 배치) -->
+    <!-- Android 전용 홈 화면 아이콘 만들기 카드 (최하단 배치) -->
     <section class="bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/30 border border-amber-500/35 rounded-2xl p-4 sm:p-5 shadow-xl shadow-black/40 mb-4">
-      <div class="text-center mb-3.5">
-        <h2 class="text-base sm:text-lg font-black text-amber-300 tracking-tight drop-shadow">
-          📲 홈 화면에 아이콘 추가 (앱처럼 실행)
-        </h2>
-      </div>
-
-      <div class="flex flex-col sm:flex-row items-center gap-4">
-        <!-- 생성될 앱 아이콘 미리보기 -->
-        <div class="shrink-0 relative">
-          <img id="appIconPreview" alt="용사 키우기 앱 아이콘"
-            class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-2 border-amber-400/80 shadow-lg shadow-amber-500/25 object-cover bg-amber-500" />
-          <span class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-slate-950 border border-amber-500/50 text-[10px] font-extrabold text-amber-300 whitespace-nowrap">
-            용사 키우기
-          </span>
+      <div class="flex items-center gap-4">
+        <div class="shrink-0">
+          <img src="https://cdn-icons-png.flaticon.com/512/3408/3408506.png" alt="용사 키우기 아이콘"
+            class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-amber-400/80 shadow-lg shadow-amber-500/25 bg-amber-500/20 p-1.5 object-contain" />
         </div>
-
-        <!-- 아이콘 만들기 버튼 및 OS별 안내 -->
-        <div class="flex-1 w-full flex flex-col gap-2.5">
-          <button id="createShortcutBtn" type="button"
-            class="w-full py-3.5 px-5 rounded-xl bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:from-yellow-200 hover:via-amber-300 hover:to-amber-500 active:scale-[0.99] text-slate-950 font-black text-sm sm:text-base border border-yellow-200/80 shadow-lg shadow-amber-500/25 transition flex items-center justify-center gap-2.5 cursor-pointer">
-            <span class="text-lg">⚔️</span>
-            <span>아이콘 만들기 (바탕화면 추가)</span>
-          </button>
-
-          <div class="text-[11px] text-slate-300/90 leading-relaxed bg-slate-950/60 border border-slate-800/80 rounded-xl px-3 py-2">
-            <p><strong class="text-amber-300">Android:</strong> 위 버튼을 누르면 스마트폰 바탕화면에 바로가기 아이콘이 생성됩니다.</p>
-            <p class="mt-0.5"><strong class="text-sky-300">iPhone (Safari):</strong> 하단 공유 버튼(<span class="font-bold text-white">⎋</span>)을 누른 뒤 <strong class="text-white">'홈 화면에 추가'</strong>를 선택하세요.</p>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs sm:text-sm font-extrabold text-amber-300 mb-1.5">
+            📱 안드로이드 바탕화면 바로가기 (Android Chrome)
           </div>
+          <button id="androidInstallBtn" type="button"
+            class="w-full py-3 px-4 rounded-xl bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:from-yellow-200 hover:via-amber-300 hover:to-amber-500 active:scale-[0.98] text-slate-950 font-black text-sm sm:text-base border border-yellow-200/80 shadow-lg shadow-amber-500/25 transition flex items-center justify-center gap-2 cursor-pointer">
+            <span>⚔️</span>
+            <span id="androidInstallBtnText">아이콘 만들기</span>
+          </button>
+          <p id="androidInstallHint" class="text-[11px] text-slate-400 mt-1.5">
+            버튼을 누르면 스마트폰 바탕화면에 게임 아이콘 설치 창이 뜹니다.
+          </p>
         </div>
       </div>
     </section>
@@ -237,32 +222,6 @@
   <div id="toastBox" class="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-40 opacity-0 transition-all duration-200 translate-y-2">
     <div id="toastMsg" class="px-4 py-2 rounded-xl bg-slate-900/95 border border-amber-500/50 text-xs sm:text-sm font-bold text-amber-200 shadow-2xl">
       알림 메시지
-    </div>
-  </div>
-
-  <!-- 아이콘 만들기 수동 안내 모달 -->
-  <div id="pwaGuideModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-sm w-full p-5 shadow-2xl">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-2">
-          <img id="modalIconPreview" alt="아이콘" class="w-8 h-8 rounded-lg border border-amber-400" />
-          <h3 class="text-base font-extrabold text-amber-300">바탕화면 아이콘 생성 안내</h3>
-        </div>
-        <button id="pwaGuideCloseBtn" type="button" class="text-slate-400 hover:text-slate-200 text-sm font-bold px-2 py-1">✕</button>
-      </div>
-      <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
-        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
-          <div class="font-extrabold text-amber-300 mb-1">📱 갤럭시 / 안드로이드 (Chrome · 삼성인터넷)</div>
-          <p>브라우저 우측 상단(또는 하단) 메뉴 <strong class="text-white">[ ⋮ ]</strong> 또는 <strong class="text-white">[ ≡ ]</strong> 를 누른 뒤 <strong class="text-amber-200">[현재 페이지 추가 → 홈 화면]</strong> 또는 <strong class="text-amber-200">[홈 화면에 추가 / 앱 설치]</strong>를 누르세요.</p>
-        </div>
-        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
-          <div class="font-extrabold text-sky-300 mb-1">🍎 아이폰 / 아이패드 (Safari)</div>
-          <p>화면 하단 가운데 <strong class="text-white">[공유 ⎋]</strong> 버튼을 누르고 아래로 내려 <strong class="text-sky-200">[홈 화면에 추가 +]</strong>를 누르면 황금 용사 아이콘이 생성됩니다.</p>
-        </div>
-      </div>
-      <button id="pwaGuideOkBtn" type="button" class="mt-4 w-full py-2.5 rounded-xl text-xs font-extrabold bg-amber-500 hover:bg-amber-400 text-slate-950 transition">
-        확인했습니다
-      </button>
     </div>
   </div>
 
@@ -339,146 +298,53 @@
   <script>
     (() => {
       // ==========================================
-      // 0. 고해상도 용사 앱 아이콘 동적 생성 & PWA 매니페스트 등록
+      // 0. Android 전용 PWA Service Worker 등록 & 원클릭 설치 이벤트
       // ==========================================
-      let deferredInstallPrompt = null;
-
-      function generateHeroAppIconDataURL() {
-        const c = document.createElement('canvas');
-        c.width = 512;
-        c.height = 512;
-        const g = c.getContext('2d');
-
-        const bgGrad = g.createRadialGradient(256, 220, 40, 256, 256, 360);
-        bgGrad.addColorStop(0, '#fef08a');
-        bgGrad.addColorStop(0.55, '#f59e0b');
-        bgGrad.addColorStop(1, '#b45309');
-        g.fillStyle = bgGrad;
-        g.fillRect(0, 0, 512, 512);
-
-        g.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-        g.lineWidth = 18;
-        g.strokeRect(9, 9, 494, 494);
-
-        g.fillStyle = 'rgba(69, 26, 3, 0.35)';
-        g.beginPath();
-        g.ellipse(245, 435, 115, 26, 0, 0, Math.PI * 2);
-        g.fill();
-
-        g.fillStyle = '#dc2626';
-        g.strokeStyle = '#1e1b18';
-        g.lineWidth = 10;
-        g.beginPath();
-        g.moveTo(195, 235);
-        g.lineTo(125, 395);
-        g.lineTo(205, 395);
-        g.closePath();
-        g.fill();
-        g.stroke();
-
-        const armorGrad = g.createLinearGradient(175, 230, 305, 370);
-        armorGrad.addColorStop(0, '#fde047');
-        armorGrad.addColorStop(1, '#d97706');
-        g.fillStyle = armorGrad;
-        g.beginPath();
-        g.roundRect(180, 235, 120, 130, 22);
-        g.fill();
-        g.stroke();
-
-        g.fillStyle = '#78350f';
-        g.fillRect(195, 365, 36, 55);
-        g.fillRect(250, 365, 36, 55);
-        g.strokeRect(195, 365, 36, 55);
-        g.strokeRect(250, 365, 36, 55);
-
-        g.fillStyle = '#fed7aa';
-        g.beginPath();
-        g.arc(242, 175, 62, 0, Math.PI * 2);
-        g.fill();
-        g.stroke();
-
-        g.fillStyle = '#0f172a';
-        g.fillRect(250, 168, 12, 20);
-        g.fillRect(278, 168, 12, 20);
-
-        g.fillStyle = '#ef4444';
-        g.beginPath();
-        g.moveTo(215, 110);
-        g.quadraticCurveTo(155, 70, 145, 135);
-        g.quadraticCurveTo(185, 135, 225, 122);
-        g.fill();
-        g.stroke();
-
-        g.fillStyle = '#facc15';
-        g.beginPath();
-        g.arc(242, 162, 66, Math.PI * 0.98, Math.PI * 2.02);
-        g.lineTo(304, 172);
-        g.lineTo(262, 152);
-        g.lineTo(178, 172);
-        g.closePath();
-        g.fill();
-        g.stroke();
-
-        g.save();
-        g.translate(335, 295);
-        g.rotate(0.58);
-        const bladeG = g.createLinearGradient(-22, -190, 22, -190);
-        bladeG.addColorStop(0, '#f8fafc');
-        bladeG.addColorStop(0.5, '#cbd5e1');
-        bladeG.addColorStop(1, '#94a3b8');
-        g.fillStyle = bladeG;
-        g.beginPath();
-        g.moveTo(-20, -25);
-        g.lineTo(-20, -185);
-        g.lineTo(0, -220);
-        g.lineTo(20, -185);
-        g.lineTo(20, -25);
-        g.closePath();
-        g.fill();
-        g.stroke();
-
-        g.fillStyle = '#f59e0b';
-        g.fillRect(-42, -28, 84, 18);
-        g.strokeRect(-42, -28, 84, 18);
-        g.fillStyle = '#78350f';
-        g.fillRect(-12, -10, 24, 48);
-        g.strokeRect(-12, -10, 24, 48);
-        g.restore();
-
-        return c.toDataURL('image/png');
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
       }
 
-      function setupPWA() {
-        const iconUrl = generateHeroAppIconDataURL();
-        document.getElementById('dynamicFavicon').href = iconUrl;
-        document.getElementById('dynamicAppleIcon').href = iconUrl;
-        document.getElementById('appIconPreview').src = iconUrl;
-        document.getElementById('modalIconPreview').src = iconUrl;
+      let deferredInstallPrompt = null;
+      const installBtn = document.getElementById('androidInstallBtn');
+      const installBtnText = document.getElementById('androidInstallBtnText');
+      const installHint = document.getElementById('androidInstallHint');
 
-        const manifestObj = {
-          name: '용사 키우기 - 클릭 훈련 RPG',
-          short_name: '용사 키우기',
-          start_url: window.location.href,
-          display: 'standalone',
-          background_color: '#020617',
-          theme_color: '#0f172a',
-          icons: [
-            { src: iconUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
-          ]
-        };
-        const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
-        document.getElementById('dynamicManifest').href = URL.createObjectURL(manifestBlob);
+      // 이미 앱으로 실행 중이거나 설치된 경우 표시
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        installBtnText.textContent = '바탕화면 아이콘 설치 완료됨';
+        installBtn.disabled = true;
+        installBtn.className = 'w-full py-3 px-4 rounded-xl bg-slate-800 text-slate-400 font-bold text-sm border border-slate-700 cursor-default flex items-center justify-center gap-2';
       }
 
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredInstallPrompt = e;
+        installBtnText.textContent = '아이콘 만들기 (지금 설치 가능)';
+        installHint.textContent = '준비 완료! 버튼을 누르면 바로 설치 팝업이 열립니다.';
+        installHint.className = 'text-[11px] text-emerald-400 font-semibold mt-1.5';
       });
 
-      setupPWA();
+      window.addEventListener('appinstalled', () => {
+        deferredInstallPrompt = null;
+        installBtnText.textContent = '바탕화면 아이콘 생성 완료!';
+        showToast('📲 스마트폰 바탕화면에 [용사 키우기] 아이콘이 생성되었습니다!');
+      });
+
+      installBtn.addEventListener('click', async () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          const { outcome } = await deferredInstallPrompt.userChoice;
+          if (outcome === 'accepted') {
+            showToast('📲 바탕화면 아이콘을 생성하는 중입니다...');
+          }
+          deferredInstallPrompt = null;
+        } else {
+          showToast('⚠️ 이미 설치되어 있거나, Chrome 브라우저 우측 상단 [⋮] → [홈 화면에 추가]를 이용해 주세요.');
+        }
+      });
 
       // ==========================================
-      // 1. 서버 연결 URL 설정 (GitHub Pages <-> 노트북 Cloudflare Tunnel)
+      // 1. 서버 연결 URL 설정
       // ==========================================
       const TUNNEL_URL = 'https://partial-catering-vatican-accounting.trycloudflare.com';
       const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -1365,32 +1231,8 @@
       }
 
       // ==========================================
-      // 7. 이벤트 바인딩 (아이콘 만들기 + 골드바 서버저장)
+      // 7. 이벤트 바인딩
       // ==========================================
-      const pwaGuideModal = document.getElementById('pwaGuideModal');
-      document.getElementById('createShortcutBtn').addEventListener('click', async () => {
-        if (deferredInstallPrompt) {
-          deferredInstallPrompt.prompt();
-          const { outcome } = await deferredInstallPrompt.userChoice;
-          if (outcome === 'accepted') {
-            showToast('📲 스마트폰 바탕화면에 [용사 키우기] 아이콘이 생성되었습니다!');
-          }
-          deferredInstallPrompt = null;
-        } else {
-          pwaGuideModal.classList.remove('hidden');
-          pwaGuideModal.classList.add('flex');
-        }
-      });
-
-      document.getElementById('pwaGuideCloseBtn').addEventListener('click', () => {
-        pwaGuideModal.classList.add('hidden');
-        pwaGuideModal.classList.remove('flex');
-      });
-      document.getElementById('pwaGuideOkBtn').addEventListener('click', () => {
-        pwaGuideModal.classList.add('hidden');
-        pwaGuideModal.classList.remove('flex');
-      });
-
       canvasWrapper.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         getAudioContext();
@@ -1432,7 +1274,7 @@
         if (e.code === 'Space' && !e.repeat) {
           const resetModal = document.getElementById('resetModal');
           const authModal = document.getElementById('authModal');
-          if (!resetModal.classList.contains('hidden') || !authModal.classList.contains('hidden') || !pwaGuideModal.classList.contains('hidden')) return;
+          if (!resetModal.classList.contains('hidden') || !authModal.classList.contains('hidden')) return;
           e.preventDefault();
           getAudioContext();
           if (!bgmTimer && state.bgmEnabled) startBGM();
