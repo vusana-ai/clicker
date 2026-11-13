@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0f172a" />
-  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3408/3408506.png" />
+  <link rel="icon" type="image/png" href="./icon.png" />
   <link rel="manifest" href="./manifest.json" />
   <title>용사 키우기 — 클릭 훈련 RPG</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
@@ -198,8 +198,8 @@
     <section class="bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/30 border border-amber-500/35 rounded-2xl p-4 sm:p-5 shadow-xl shadow-black/40 mb-4">
       <div class="flex items-center gap-4">
         <div class="shrink-0">
-          <img src="https://cdn-icons-png.flaticon.com/512/3408/3408506.png" alt="용사 키우기 아이콘"
-            class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-amber-400/80 shadow-lg shadow-amber-500/25 bg-amber-500/20 p-1.5 object-contain" />
+          <img src="./icon.png" alt="용사 키우기 아이콘"
+            class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-amber-400/80 shadow-lg shadow-amber-500/25 object-cover bg-amber-500" />
         </div>
         <div class="flex-1 min-w-0">
           <div class="text-xs sm:text-sm font-extrabold text-amber-300 mb-1.5">
@@ -309,7 +309,6 @@
       const installBtnText = document.getElementById('androidInstallBtnText');
       const installHint = document.getElementById('androidInstallHint');
 
-      // 이미 앱으로 실행 중이거나 설치된 경우 표시
       if (window.matchMedia('(display-mode: standalone)').matches) {
         installBtnText.textContent = '바탕화면 아이콘 설치 완료됨';
         installBtn.disabled = true;
@@ -339,7 +338,7 @@
           }
           deferredInstallPrompt = null;
         } else {
-          showToast('⚠️ 이미 설치되어 있거나, Chrome 브라우저 우측 상단 [⋮] → [홈 화면에 추가]를 이용해 주세요.');
+          showToast('⚠️ Chrome 브라우저 우측 상단 [⋮] 메뉴 → [홈 화면에 추가]를 눌러주세요.');
         }
       });
 
