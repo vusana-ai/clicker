@@ -498,11 +498,12 @@
       });
 
       // ==========================================
-      // 1. 서버 연결 URL, 토스페이먼츠 & 관리자 VIP 설정
+      // 1. 클라우드 서버 연결 URL, 토스페이먼츠 & 관리자 VIP 설정
       // ==========================================
-      const TUNNEL_URL = 'https://partial-catering-vatican-accounting.trycloudflare.com';
+      const GAME_ID = 'clicker';
+      const CLOUD_API_URL = 'https://02826k.duckdns.org';
       const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const API_BASE_URL = isLocalHost ? '' : TUNNEL_URL;
+      const API_BASE_URL = isLocalHost ? '' : CLOUD_API_URL;
 
       const TOSS_CLIENT_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
       const VIP_PRICE = 7000;
@@ -640,7 +641,11 @@
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${authToken}`
             },
-            body: JSON.stringify({ saveData: state })
+            body: JSON.stringify({
+              gameId: GAME_ID,
+              saveData: state,
+              score: state.power
+            })
           });
           if (res.status === 401 || res.status === 403) {
             handleLogout(true);
@@ -649,8 +654,8 @@
           const data = await res.json();
           if (res.ok) {
             hasUnsavedChanges = false;
-            document.getElementById('syncStatusText').textContent = `서버 DB 저장 완료 (${data.savedAt})`;
-            if (showNotification) showToast(`🟨 [${currentUsername}] 서버에 데이터가 안전하게 저장되었습니다!`);
+            document.getElementById('syncStatusText').textContent = `클라우드 DB 저장 완료 (${data.savedAt})`;
+            if (showNotification) showToast(`🟨 [${currentUsername}] 클라우드 서버에 데이터가 안전하게 저장되었습니다!`);
             fetchAndRenderRanking();
           }
         } catch (err) {
@@ -661,7 +666,7 @@
       async function loadFromServer() {
         if (!authToken) return;
         try {
-          const res = await fetch(`${API_BASE_URL}/api/load`, {
+          const res = await fetch(`${API_BASE_URL}/api/load?gameId=${GAME_ID}`, {
             headers: { 'Authorization': `Bearer ${authToken}` }
           });
           if (res.status === 401 || res.status === 403) {
@@ -831,7 +836,7 @@
 
         try {
           const headers = authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
-          const res = await fetch(`${API_BASE_URL}/api/ranking`, { headers });
+          const res = await fetch(`${API_BASE_URL}/api/ranking?gameId=${GAME_ID}`, { headers });
           const data = await res.json();
 
           if (!res.ok) throw new Error(data.error || '랭킹 로드 실패');
@@ -918,7 +923,7 @@
           tickerText.textContent = '랭킹 서버 연결 대기 중...';
           listContainer.innerHTML = `
             <div class="text-center py-6 text-xs text-rose-300 bg-rose-950/25 rounded-xl border border-rose-800/40">
-              랭킹 정보를 불러올 수 없습니다. 노트북 서버 연결 상태를 확인해 주세요.
+              랭킹 정보를 불러올 수 없습니다. 클라우드 서버 연결 상태를 확인해 주세요.
             </div>
           `;
         }
@@ -940,7 +945,7 @@
           const adminTag = isAdminAccount(currentUsername) ? ' 👑관리자' : '';
           userBadge.textContent = `📱 ${currentUsername}${adminTag}`;
           userBadge.className = 'px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 shrink-0';
-          syncText.textContent = '서버 DB 연동 중 (자동 저장 및 클릭 시 즉시 저장)';
+          syncText.textContent = '클라우드 DB 연동 중 (자동 저장 및 클릭 시 즉시 저장)';
           saveBtnLabel.textContent = '서버저장';
           logoutBtn.classList.remove('hidden');
         } else {
@@ -2659,8 +2664,8 @@
         }
 
         const payload = isRegisterMode
-          ? { username: fullPhoneId, password: pin, initialSaveData: state }
-          : { username: fullPhoneId, password: pin };
+          ? { username: fullPhoneId, password: pin, initialSaveData: state, gameId: GAME_ID }
+          : { username: fullPhoneId, password: pin, gameId: GAME_ID };
 
         try {
           const res = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -2715,7 +2720,7 @@
             : `🟨 [${currentUsername}] 로그인 완료!${vipNotice}`
           );
         } catch (err) {
-          authErrorMsg.textContent = '노트북 게임 서버와 연결할 수 없습니다.';
+          authErrorMsg.textContent = '클라우드 게임 서버와 연결할 수 없습니다.';
           authErrorMsg.classList.remove('hidden');
         }
       });
