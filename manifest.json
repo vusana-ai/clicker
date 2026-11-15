@@ -1,7 +1,7 @@
 {
-  "name": "용사 키우기 — 클릭 훈련 RPG",
-  "short_name": "용사 키우기",
-  "start_url": "./index.html",
+  "name": "AI게임장",
+  "short_name": "AI게임장",
+  "start_url": "./arcade.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#020617",
