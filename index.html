@@ -523,7 +523,7 @@
       const VIP_PRICE = 7000;
 
       // 👑 관리자 VIP 계정 목록 (해당 번호로 로그인/가입 시 자동 VIP 부여)
-      const ADMIN_VIP_PHONES = ['010-9485-0928'];
+      const ADMIN_VIP_PHONES = []; // VIP 여부는 서버 DB에서 관리
 
       const STORAGE_KEY = 'hero_clicker_rpg_save_v1';
       const TOKEN_KEY = 'hero_clicker_jwt_token';
@@ -690,7 +690,7 @@
           const data = await res.json();
           if (res.ok && data.saveData) {
             const wasVip = state.isVip;
-            state = sanitizeState(data.saveData);
+            state = sanitizeState({ ...(data.saveData || {}), isVip: Boolean(data.isVip || data.saveData?.isVip) });
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             if (!wasVip && state.isVip) {
               syncSaveToServer(false);
@@ -2702,7 +2702,7 @@
 
           if (!isRegisterMode) {
             if (data.saveData) {
-              state = sanitizeState(data.saveData);
+              state = sanitizeState({ ...(data.saveData || {}), isVip: Boolean(data.isVip || data.saveData?.isVip) });
               localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
               if (state.isVip) {
                 await syncSaveToServer(false);
