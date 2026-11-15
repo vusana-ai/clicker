@@ -1,7 +1,7 @@
 {
-  "name": "AI게임장",
-  "short_name": "AI게임장",
-  "start_url": "./arcade.html",
+  "name": "용사 키우기",
+  "short_name": "용사 키우기",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#020617",
