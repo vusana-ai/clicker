@@ -467,7 +467,7 @@
       window.addEventListener('appinstalled', () => {
         deferredInstallPrompt = null;
         installBtnText.textContent = '바탕화면 아이콘 생성 완료!';
-        showToast('📲 스마트폰 바탕화면에 [용사 키우기] 아이콘이 생성되었습니다!');
+        showToast('📲 바탕화면에 [AI게임장] 아이콘이 생성되었습니다!');
       });
 
       installBtn.addEventListener('click', async () => {
@@ -488,17 +488,17 @@
 
         if (!isMobile) {
           // Windows / PC: 브라우저 설치 창이 안 뜨는 환경에서도 바로 실행 가능한 .url 바로가기 파일 다운로드
-          const targetUrl = window.location.href.split('?')[0].split('#')[0];
+          const targetUrl = 'https://link.inpock.co.kr/aigame';
           const urlContent = '[InternetShortcut]\r\nURL=' + targetUrl + '\r\n';
           const blob = new Blob([urlContent], { type: 'text/plain;charset=utf-8' });
           const a = document.createElement('a');
           a.href = URL.createObjectURL(blob);
-          a.download = '용사키우기_바로가기.url';
+          a.download = 'AI게임장_바로가기.url';
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(a.href);
-          showToast('💻 윈도우용 [용사키우기_바로가기.url]이 다운로드되었습니다! (또는 주소창 우측 설치 아이콘 클릭)');
+          showToast('💻 윈도우용 [AI게임장_바로가기.url]이 다운로드되었습니다! (또는 주소창 우측 설치 아이콘 클릭)');
         } else if (isAndroid && isInApp) {
           // 카카오톡·인스타 등 인앱 브라우저에서는 PWA 설치가 막히므로 Chrome으로 자동 전환
           const cleanUrl = window.location.href.split('#')[0].replace(/^https?:\/\//, '');
