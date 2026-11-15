@@ -495,7 +495,11 @@
           return;
         }
 
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const ua = navigator.userAgent || '';
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+        const isAndroid = /Android/i.test(ua);
+        const isInApp = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line|wv\)/i.test(ua);
+
         if (!isMobile) {
           // Windows / PC: 브라우저 설치 창이 안 뜨는 환경에서도 바로 실행 가능한 .url 바로가기 파일 다운로드
           const targetUrl = window.location.href.split('?')[0].split('#')[0];
@@ -509,8 +513,15 @@
           document.body.removeChild(a);
           URL.revokeObjectURL(a.href);
           showToast('💻 윈도우용 [용사키우기_바로가기.url]이 다운로드되었습니다! (또는 주소창 우측 설치 아이콘 클릭)');
+        } else if (isAndroid && isInApp) {
+          // 카카오톡·인스타 등 인앱 브라우저에서는 PWA 설치가 막히므로 Chrome으로 자동 전환
+          const cleanUrl = window.location.href.split('#')[0].replace(/^https?:\/\//, '');
+          showToast('📲 인앱 브라우저에서는 설치가 제한되어 Chrome으로 이동합니다...');
+          setTimeout(() => {
+            window.location.href = 'intent://' + cleanUrl + '#Intent;scheme=https;package=com.android.chrome;end';
+          }, 300);
         } else {
-          showToast('⚠️ Chrome 브라우저 우측 상단 [⋮] 메뉴 → [홈 화면에 추가]를 눌러주세요.');
+          showToast('⚠️ 이미 설치되었거나 대기 중입니다. 브라우저 메뉴 [⋮] → [홈 화면에 추가]를 눌러주세요.');
         }
       });
 
