@@ -278,7 +278,7 @@
         </div>
         <div class="flex-1 min-w-0">
           <div class="text-xs sm:text-sm font-extrabold text-amber-300 mb-1.5">
-            📱 안드로이드 바탕화면 바로가기 (Android Chrome)
+            📲 바탕화면 바로가기 아이콘 설치 (Android / Windows)
           </div>
           <button id="androidInstallBtn" type="button"
             class="w-full py-3 px-4 rounded-xl bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:from-yellow-200 hover:via-amber-300 hover:to-amber-500 active:scale-[0.98] text-slate-950 font-black text-sm sm:text-base border border-yellow-200/80 shadow-lg shadow-amber-500/25 transition flex items-center justify-center gap-2 cursor-pointer">
@@ -286,7 +286,7 @@
             <span id="androidInstallBtnText">아이콘 만들기</span>
           </button>
           <p id="androidInstallHint" class="text-[11px] text-slate-400 mt-1.5">
-            버튼을 누르면 스마트폰 바탕화면에 게임 아이콘 설치 창이 뜹니다.
+            안드로이드 폰과 윈도우(Chrome/Edge) 모두 바탕화면 바로가기 아이콘을 만들 수 있습니다.
           </p>
         </div>
       </div>
@@ -492,6 +492,23 @@
             showToast('📲 바탕화면 아이콘을 생성하는 중입니다...');
           }
           deferredInstallPrompt = null;
+          return;
+        }
+
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (!isMobile) {
+          // Windows / PC: 브라우저 설치 창이 안 뜨는 환경에서도 바로 실행 가능한 .url 바로가기 파일 다운로드
+          const targetUrl = window.location.href.split('?')[0].split('#')[0];
+          const urlContent = '[InternetShortcut]\r\nURL=' + targetUrl + '\r\n';
+          const blob = new Blob([urlContent], { type: 'text/plain;charset=utf-8' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = '용사키우기_바로가기.url';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(a.href);
+          showToast('💻 윈도우용 [용사키우기_바로가기.url]이 다운로드되었습니다! (또는 주소창 우측 설치 아이콘 클릭)');
         } else {
           showToast('⚠️ Chrome 브라우저 우측 상단 [⋮] 메뉴 → [홈 화면에 추가]를 눌러주세요.');
         }
