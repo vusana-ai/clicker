@@ -410,24 +410,6 @@
     </div>
   </div>
 
-  <!-- Custom Reset Confirmation Modal -->
-  <div id="resetModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-5 shadow-2xl">
-      <h2 class="text-base font-extrabold text-slate-100 mb-1.5">훈련 기록 초기화</h2>
-      <p class="text-xs text-slate-400 leading-relaxed mb-4">
-        지금까지 모은 명예, 골드, 무기 및 지역 해금 기록을 모두 초기화하고 처음부터 다시 시작할까요?
-      </p>
-      <div class="flex justify-end gap-2">
-        <button id="resetCancelBtn" type="button" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition">
-          취소
-        </button>
-        <button id="resetConfirmBtn" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition">
-          초기화하기
-        </button>
-      </div>
-    </div>
-  </div>
-
   <script>
     (() => {
       // ==========================================
@@ -1809,24 +1791,99 @@
           ctx.fillStyle = '#92400e';
           ctx.fillRect(-18, -26, 16, 26); ctx.fillRect(14, -28, 18, 28);
 
+          // 목 + 황금 비늘 하이라이트
+          const neckGrad = ctx.createLinearGradient(-34, -130 + bob, 4, -74 + bob);
+          neckGrad.addColorStop(0, '#f59e0b'); neckGrad.addColorStop(1, '#b45309');
+          ctx.fillStyle = neckGrad;
+          ctx.beginPath();
+          ctx.moveTo(-16, -80 + bob); ctx.quadraticCurveTo(-36, -104 + bob, -30, -128 + bob);
+          ctx.lineTo(-10, -122 + bob); ctx.quadraticCurveTo(-6, -96 + bob, 4, -74 + bob);
+          ctx.closePath(); ctx.fill();
+
+          // 뒤쪽 보조 뿔 & 메인 황금 왕관 뿔
           ctx.fillStyle = '#d97706';
           ctx.beginPath();
-          ctx.moveTo(-16, -80 + bob); ctx.quadraticCurveTo(-40, -106 + bob, -34, -132 + bob);
-          ctx.lineTo(-10, -124 + bob); ctx.quadraticCurveTo(-8, -96 + bob, 4, -74 + bob);
-          ctx.fill();
+          ctx.moveTo(-14, -130 + bob); ctx.quadraticCurveTo(4, -150 + bob, 18, -154 + bob); ctx.lineTo(-4, -124 + bob);
+          ctx.closePath(); ctx.fill();
 
+          const hornGrad = ctx.createLinearGradient(-22, -134 + bob, 20, -172 + bob);
+          hornGrad.addColorStop(0, '#f59e0b'); hornGrad.addColorStop(0.6, '#fef08a'); hornGrad.addColorStop(1, '#ffffff');
+          ctx.fillStyle = hornGrad;
+          ctx.beginPath();
+          ctx.moveTo(-22, -134 + bob); ctx.quadraticCurveTo(-4, -158 + bob, 20, -172 + bob);
+          ctx.quadraticCurveTo(2, -146 + bob, -10, -126 + bob);
+          ctx.closePath(); ctx.fill();
+
+          // 아래턱 (포효하는 입)
+          ctx.fillStyle = '#b45309';
+          ctx.beginPath();
+          ctx.moveTo(-28, -118 + bob);
+          ctx.lineTo(-58, -108 + bob);
+          ctx.lineTo(-54, -102 + bob);
+          ctx.lineTo(-22, -108 + bob);
+          ctx.closePath(); ctx.fill();
+
+          // 위턱 & 용의 두상 (날카로운 콧등과 눈썹 능선)
+          const headGrad = ctx.createLinearGradient(-64, -136 + bob, -10, -112 + bob);
+          headGrad.addColorStop(0, '#fef08a'); headGrad.addColorStop(0.5, '#f59e0b'); headGrad.addColorStop(1, '#b45309');
+          ctx.fillStyle = headGrad;
+          ctx.beginPath();
+          ctx.moveTo(-12, -126 + bob);
+          ctx.lineTo(-26, -138 + bob); // 이마 능선
+          ctx.lineTo(-42, -132 + bob); // 눈썹 뼈
+          ctx.lineTo(-62, -124 + bob); // 콧등 끝
+          ctx.lineTo(-66, -117 + bob); // 코끝
+          ctx.lineTo(-56, -114 + bob); // 윗입술
+          ctx.lineTo(-26, -117 + bob); // 입안쪽
+          ctx.lineTo(-14, -114 + bob); // 턱관절
+          ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 1.2; ctx.stroke();
+
+          // 콧등 위 작은 뿔 & 뺨 가시
           ctx.fillStyle = '#fef08a';
-          ctx.beginPath(); ctx.moveTo(-20, -136 + bob); ctx.lineTo(14, -166 + bob); ctx.lineTo(-8, -128 + bob); ctx.closePath(); ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(-58, -125 + bob); ctx.lineTo(-64, -133 + bob); ctx.lineTo(-52, -126 + bob);
+          ctx.closePath(); ctx.fill();
+
+          ctx.fillStyle = '#f59e0b';
+          ctx.beginPath();
+          ctx.moveTo(-18, -118 + bob); ctx.lineTo(-4, -118 + bob); ctx.lineTo(-14, -110 + bob);
+          ctx.closePath(); ctx.fill();
+
+          // 날카로운 송곳니 (위/아래)
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.moveTo(-56, -115 + bob); ctx.lineTo(-54, -109 + bob); ctx.lineTo(-51, -115 + bob);
+          ctx.moveTo(-46, -116 + bob); ctx.lineTo(-44, -110 + bob); ctx.lineTo(-41, -116 + bob);
+          ctx.moveTo(-54, -105 + bob); ctx.lineTo(-52, -110 + bob); ctx.lineTo(-49, -105 + bob);
+          ctx.closePath(); ctx.fill();
+
+          // 날카롭게 빛나는 용의 눈 (붉은 광채 + 황금 동공)
+          ctx.fillStyle = '#451a03';
+          ctx.beginPath();
+          ctx.moveTo(-43, -128 + bob); ctx.lineTo(-31, -131 + bob); ctx.lineTo(-34, -123 + bob);
+          ctx.closePath(); ctx.fill();
 
           ctx.fillStyle = '#ef4444';
           ctx.shadowColor = '#ef4444'; ctx.shadowBlur = 10;
-          ctx.beginPath(); ctx.arc(-38, -124 + bob, 4.5, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(-41, -127 + bob); ctx.lineTo(-33, -129 + bob); ctx.lineTo(-35, -124 + bob);
+          ctx.closePath(); ctx.fill();
+          ctx.fillStyle = '#fef08a';
+          ctx.beginPath(); ctx.arc(-36, -126.5 + bob, 1.3, 0, Math.PI * 2); ctx.fill();
           ctx.shadowBlur = 0;
 
-          if (Math.random() < 0.5) {
-            ctx.fillStyle = '#fef08a';
+          // 입에서 뿜어져 나오는 황금 화염 숨결
+          if (Math.random() < 0.65) {
+            const flameGrad = ctx.createLinearGradient(-56, -112 + bob, -86, -108 + bob);
+            flameGrad.addColorStop(0, '#ffffff');
+            flameGrad.addColorStop(0.4, '#fef08a');
+            flameGrad.addColorStop(1, 'rgba(249, 115, 22, 0)');
+            ctx.fillStyle = flameGrad;
             ctx.beginPath();
-            ctx.moveTo(-46, -114 + bob); ctx.lineTo(-74, -118 + bob); ctx.lineTo(-54, -102 + bob);
+            ctx.moveTo(-55, -113 + bob);
+            ctx.quadraticCurveTo(-72, -118 + bob, -88, -110 + bob);
+            ctx.quadraticCurveTo(-70, -102 + bob, -55, -107 + bob);
             ctx.closePath(); ctx.fill();
           }
         }
@@ -1980,13 +2037,14 @@
         ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill();
 
         if (weapon.id === 'iron_axe') {
-          ctx.fillStyle = '#78350f'; ctx.fillRect(-2.5, -36, 5, 40);
-          const axeGrad = ctx.createLinearGradient(-22, -38, 10, -18);
+          ctx.fillStyle = '#78350f'; ctx.fillRect(-3, -74, 6, 78);
+          ctx.fillStyle = '#475569'; ctx.fillRect(-4, -76, 8, 6);
+          const axeGrad = ctx.createLinearGradient(-28, -76, 6, -46);
           axeGrad.addColorStop(0, '#f8fafc'); axeGrad.addColorStop(0.5, '#94a3b8'); axeGrad.addColorStop(1, '#334155');
           ctx.fillStyle = axeGrad;
           ctx.beginPath();
-          ctx.moveTo(-22, -32); ctx.quadraticCurveTo(-12, -18, 0, -20);
-          ctx.lineTo(0, -38); ctx.quadraticCurveTo(-12, -38, -22, -32);
+          ctx.moveTo(-28, -66); ctx.quadraticCurveTo(-16, -46, 0, -50);
+          ctx.lineTo(0, -74); ctx.quadraticCurveTo(-16, -76, -28, -66);
           ctx.closePath(); ctx.fill();
           ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1.5; ctx.stroke();
         } else {
@@ -2024,8 +2082,25 @@
           ctx.stroke();
 
           if (weapon.id === 'light_sword') {
-            ctx.fillStyle = '#fef08a';
-            ctx.beginPath(); ctx.arc(0, -19 - bladeLength, 5, 0, Math.PI * 2); ctx.fill();
+            const tipY = -19 - bladeLength;
+            const flare = 10 + Math.sin(anim.time * 8) * 2;
+            ctx.save();
+            ctx.translate(0, tipY);
+            ctx.shadowColor = '#fef08a';
+            ctx.shadowBlur = 16;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.moveTo(0, -flare);
+            ctx.lineTo(2.4, -2.4);
+            ctx.lineTo(flare * 0.85, 0);
+            ctx.lineTo(2.4, 2.4);
+            ctx.lineTo(0, flare * 0.7);
+            ctx.lineTo(-2.4, 2.4);
+            ctx.lineTo(-flare * 0.85, 0);
+            ctx.lineTo(-2.4, -2.4);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
           }
           ctx.shadowBlur = 0;
         }
@@ -2484,9 +2559,8 @@
 
       window.addEventListener('keydown', (e) => {
         if (e.code === 'Space' && !e.repeat) {
-          const resetModal = document.getElementById('resetModal');
           const authModal = document.getElementById('authModal');
-          if (!resetModal.classList.contains('hidden') || !authModal.classList.contains('hidden') || !vipModal.classList.contains('hidden')) return;
+          if (!authModal.classList.contains('hidden') || !vipModal.classList.contains('hidden')) return;
           e.preventDefault();
           getAudioContext();
           if (!bgmTimer && state.bgmEnabled) startBGM();
@@ -2656,23 +2730,6 @@
           authErrorMsg.textContent = '클라우드 게임 서버와 연결할 수 없습니다.';
           authErrorMsg.classList.add('hidden');
         }
-      });
-
-      const resetModal = document.getElementById('resetModal');
-      document.getElementById('resetOpenBtn').addEventListener('click', () => {
-        resetModal.classList.remove('hidden'); resetModal.classList.add('flex');
-      });
-      document.getElementById('resetCancelBtn').addEventListener('click', () => {
-        resetModal.classList.add('hidden'); resetModal.classList.remove('flex');
-      });
-      document.getElementById('resetConfirmBtn').addEventListener('click', () => {
-        state = defaultState();
-        state = sanitizeState(state);
-        anim.combo = 0; anim.comboTimer = 0;
-        saveState(true); updateUI();
-        if (state.bgmEnabled) startBGM();
-        resetModal.classList.add('hidden'); resetModal.classList.remove('flex');
-        showToast('🔄 모든 훈련 기록이 초기화되었습니다.');
       });
 
       // ==========================================
