@@ -77,8 +77,8 @@
             <span>G</span>
           </div>
 
-          <!-- 골드바 모양 서버저장 버튼 복구 -->
-          <button id="serverSaveGoldBtn" type="button" title="클릭하여 서버 로그인 및 데이터 영구 저장"
+          <!-- 로그인 / 로그아웃 토글 버튼 -->
+          <button id="authToggleBtn" type="button" title="로그인 및 로그아웃"
             class="group px-2.5 sm:px-3 py-1 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:from-yellow-200 hover:via-amber-300 hover:to-amber-500 text-slate-950 border border-yellow-200/80 shadow-md shadow-amber-500/25 transition active:scale-95 flex items-center gap-1.5 cursor-pointer">
             <svg class="w-3.5 h-3.5 shrink-0 gold-bar-glow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M5.5 7.5L8.5 5H15.5L18.5 7.5L21 17.5H3L5.5 7.5Z" fill="#78350F" stroke="#451A03" stroke-width="1.4" stroke-linejoin="round"/>
@@ -86,21 +86,13 @@
               <path d="M7 9.5H17L19.2 16.5H4.8L7 9.5Z" fill="#F59E0B"/>
               <path d="M8.8 6.2H15.2L16.1 8.6H7.9L8.8 6.2Z" fill="#FFFFFF" fill-opacity="0.55"/>
             </svg>
-            <span id="serverSaveBtnLabel">로그인</span>
-          </button>
-
-          <button id="logoutBtn" type="button" class="hidden px-2.5 py-1 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer">
-            로그아웃
+            <span id="authToggleBtnLabel">로그인</span>
           </button>
         </div>
       </div>
 
-      <!-- 2단: 상태 안내 문구 + 아래칸 [배경음 / 효과음 / 초기화] 버튼 -->
-      <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-800/70">
-        <p id="syncStatusText" class="text-[11px] text-slate-400 truncate">
-          우측 상단 [로그인]을 눌러 데이터를 영구 보관하세요
-        </p>
-
+      <!-- 2단: [배경음 / 효과음] 버튼 -->
+      <div class="flex items-center justify-end gap-2 pt-1.5 border-t border-slate-800/70">
         <div class="flex items-center gap-1.5 shrink-0 ml-auto">
           <button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-950/80 hover:bg-indigo-900/80 border border-indigo-700/60 text-indigo-200 transition active:scale-95 cursor-pointer">
             🎵 배경음 ON
@@ -633,12 +625,10 @@
           const data = await res.json();
           if (res.ok) {
             hasUnsavedChanges = false;
-            document.getElementById('syncStatusText').textContent = `클라우드 DB 저장 완료 (${data.savedAt})`;
             if (showNotification) showToast(`🟨 [${currentUsername}] 클라우드 서버에 데이터가 안전하게 저장되었습니다!`);
             fetchAndRenderRanking();
           }
         } catch (err) {
-          document.getElementById('syncStatusText').textContent = '⚠️ 서버 연결 실패 (로컬 임시 보관 중)';
         }
       }
 
@@ -925,23 +915,20 @@
 
       function updateAuthHeaderUI() {
         const userBadge = document.getElementById('userBadge');
-        const syncText = document.getElementById('syncStatusText');
-        const saveBtnLabel = document.getElementById('serverSaveBtnLabel');
-        const logoutBtn = document.getElementById('logoutBtn');
+        const authToggleBtn = document.getElementById('authToggleBtn');
+        const authToggleBtnLabel = document.getElementById('authToggleBtnLabel');
 
         if (authToken && currentUsername) {
           const adminTag = isAdminAccount(currentUsername) ? ' 👑관리자' : '';
           userBadge.textContent = `📱 ${maskPhoneMiddle(currentUsername)}${adminTag}`;
           userBadge.className = 'px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 shrink-0';
-          syncText.textContent = '클라우드 DB 연동 중 (자동 저장 및 클릭 시 즉시 저장)';
-          saveBtnLabel.textContent = '서버저장';
-          logoutBtn.classList.remove('hidden');
+          authToggleBtnLabel.textContent = '로그아웃';
+          authToggleBtn.className = 'group px-2.5 sm:px-3 py-1 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 shadow-sm transition active:scale-95 flex items-center gap-1.5 cursor-pointer';
         } else {
           userBadge.textContent = '👤 게스트';
           userBadge.className = 'px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-slate-800 border border-slate-700 text-slate-300 shrink-0';
-          syncText.textContent = '우측 상단 [로그인]을 눌러 데이터를 영구 보관하세요';
-          saveBtnLabel.textContent = '로그인';
-          logoutBtn.classList.add('hidden');
+          authToggleBtnLabel.textContent = '로그인';
+          authToggleBtn.className = 'group px-2.5 sm:px-3 py-1 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:from-yellow-200 hover:via-amber-300 hover:to-amber-500 text-slate-950 border border-yellow-200/80 shadow-md shadow-amber-500/25 transition active:scale-95 flex items-center gap-1.5 cursor-pointer';
         }
       }
 
@@ -1138,7 +1125,7 @@
       let canvasHeight = 380;
 
       const anim = {
-        time: 0, heroDash: 0, swingProgress: 0, monsterHit: 0, hitFlash: 0,
+        time: 0, heroDash: 0, swingProgress: 0, monsterHit: 0, hitFlash: 0, attackPattern: 0,
         screenShake: 0, combo: 0, comboTimer: 0,
         particles: [], floatingTexts: [], ambientParticles: [],
         shockwaves: [], slashTrails: []
@@ -1938,15 +1925,18 @@
 
       function drawHero(baseX, groundY, weapon) {
         const breathe = Math.sin(anim.time * 3.6) * 2.5;
-        const dashOffset = Math.sin(anim.heroDash * Math.PI) * 62;
+        const dashDist = anim.attackPattern === 2 ? 90 : anim.attackPattern === 1 ? 54 : 62;
+        const dashOffset = Math.sin(anim.heroDash * Math.PI) * dashDist;
+        const jumpY = anim.attackPattern === 1 ? -Math.sin(anim.heroDash * Math.PI) * 32 : 0;
         const x = baseX + dashOffset;
-        const y = groundY;
+        const y = groundY + jumpY;
         ctx.save();
 
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        ctx.beginPath(); ctx.ellipse(x, y + 3, 36, 10, 0, 0, Math.PI * 2); ctx.fill();
+        const shadowScale = anim.attackPattern === 1 ? Math.max(0.65, 1 + jumpY / 90) : 1;
+        ctx.beginPath(); ctx.ellipse(x, groundY + 3, 36 * shadowScale, 10 * shadowScale, 0, 0, Math.PI * 2); ctx.fill();
 
-        drawHonorAura(x, y, state.honorLevel);
+        drawHonorAura(x, groundY, state.honorLevel);
 
         const capeWave = Math.sin(anim.time * 5.5) * 8;
         const capeGrad = ctx.createLinearGradient(x - 52, y - 82, x - 6, y - 10);
@@ -1976,7 +1966,13 @@
 
         ctx.save();
         ctx.translate(x, y - 58 + breathe);
-        const bodyTilt = anim.swingProgress > 0 ? Math.sin(anim.swingProgress * Math.PI) * 0.18 : 0;
+        let bodyTilt = 0;
+        if (anim.swingProgress > 0) {
+          const s = Math.sin(anim.swingProgress * Math.PI);
+          if (anim.attackPattern === 1) bodyTilt = -s * 0.14;
+          else if (anim.attackPattern === 2) bodyTilt = s * 0.28;
+          else bodyTilt = s * 0.18;
+        }
         ctx.rotate(bodyTilt);
 
         const armorGrad = ctx.createLinearGradient(-18, -26, 20, 24);
@@ -2027,10 +2023,21 @@
         ctx.restore();
 
         ctx.save();
-        ctx.translate(12, -10);
-        const swingAngle = anim.swingProgress > 0
-          ? -0.65 + Math.sin(anim.swingProgress * Math.PI) * 2.35
-          : -0.45 + Math.sin(anim.time * 3.6) * 0.06;
+        const thrustOffset = (anim.swingProgress > 0 && anim.attackPattern === 2)
+          ? Math.sin(anim.swingProgress * Math.PI) * 24
+          : 0;
+        ctx.translate(12 + thrustOffset, anim.attackPattern === 2 && anim.swingProgress > 0 ? -6 : -10);
+        let swingAngle = -0.45 + Math.sin(anim.time * 3.6) * 0.06;
+        if (anim.swingProgress > 0) {
+          const s = Math.sin(anim.swingProgress * Math.PI);
+          if (anim.attackPattern === 0) {
+            swingAngle = -0.65 + s * 2.35; // 패턴 1: 내려베기
+          } else if (anim.attackPattern === 1) {
+            swingAngle = 1.65 - s * 2.55;  // 패턴 2: 점프 올려베기
+          } else {
+            swingAngle = Math.PI * 0.48;   // 패턴 3: 수평 돌진 찌르기
+          }
+        }
         ctx.rotate(swingAngle);
 
         ctx.fillStyle = '#cbd5e1';
@@ -2112,19 +2119,62 @@
           ctx.save();
           ctx.translate(x + 30, y - 60);
           ctx.lineCap = 'round';
-
           ctx.strokeStyle = weapon.slashColor;
           ctx.shadowColor = weapon.slashColor;
           ctx.shadowBlur = 16;
-          ctx.globalAlpha = slashAlpha * 0.92;
-          ctx.lineWidth = 8 + weapon.tier * 2;
-          ctx.beginPath(); ctx.arc(0, 0, 62 + weapon.tier * 5, -0.95, 0.9); ctx.stroke();
 
-          ctx.strokeStyle = '#ffffff';
-          ctx.shadowBlur = 0;
-          ctx.globalAlpha = slashAlpha * 0.85;
-          ctx.lineWidth = 3;
-          ctx.beginPath(); ctx.arc(0, 0, 62 + weapon.tier * 5, -0.85, 0.8); ctx.stroke();
+          if (anim.attackPattern === 2) {
+            // 패턴 3: 돌진 찌르기 관통 섬광 + 스피드 라인
+            const beamLen = 92 + weapon.tier * 10;
+            ctx.globalAlpha = slashAlpha * 0.92;
+            ctx.fillStyle = weapon.slashColor;
+            ctx.beginPath();
+            ctx.moveTo(10, -8);
+            ctx.lineTo(10 + beamLen, 0);
+            ctx.lineTo(10, 8);
+            ctx.lineTo(24, 0);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = slashAlpha * 0.9;
+            ctx.beginPath();
+            ctx.moveTo(18, -3.5);
+            ctx.lineTo(18 + beamLen * 0.92, 0);
+            ctx.lineTo(18, 3.5);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.strokeStyle = weapon.slashColor;
+            ctx.lineWidth = 2.5;
+            ctx.globalAlpha = slashAlpha * 0.7;
+            ctx.beginPath();
+            ctx.moveTo(-25, -22); ctx.lineTo(55, -22);
+            ctx.moveTo(-35, 18); ctx.lineTo(48, 18);
+            ctx.stroke();
+          } else {
+            // 패턴 1 (내려베기) / 패턴 2 (올려베기) 호 궤적
+            const arcRadius = 62 + weapon.tier * 5;
+            const startAng = anim.attackPattern === 1 ? -1.15 : -0.95;
+            const endAng = anim.attackPattern === 1 ? 0.65 : 0.9;
+
+            ctx.globalAlpha = slashAlpha * 0.92;
+            ctx.lineWidth = 8 + weapon.tier * 2;
+            ctx.beginPath(); ctx.arc(0, 0, arcRadius, startAng, endAng); ctx.stroke();
+
+            if (anim.attackPattern === 1) {
+              ctx.globalAlpha = slashAlpha * 0.45;
+              ctx.lineWidth = 4 + weapon.tier;
+              ctx.beginPath(); ctx.arc(0, 0, arcRadius * 0.78, startAng + 0.15, endAng - 0.1); ctx.stroke();
+            }
+
+            ctx.strokeStyle = '#ffffff';
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = slashAlpha * 0.85;
+            ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.arc(0, 0, arcRadius, startAng + 0.1, endAng - 0.1); ctx.stroke();
+          }
           ctx.restore();
         }
         ctx.restore();
@@ -2184,6 +2234,7 @@
         state.gold += goldGain;
         state.totalClicks += 1;
 
+        anim.attackPattern = (anim.attackPattern + 1) % 3;
         anim.heroDash = 1.0;
         anim.swingProgress = 0.01;
         anim.monsterHit = 1.0;
@@ -2582,10 +2633,6 @@
         else { showToast('🔇 효과음이 꺼졌습니다.'); }
       });
 
-      document.getElementById('logoutBtn').addEventListener('click', () => {
-        handleLogout(false);
-      });
-
       const authModal = document.getElementById('authModal');
       const modeLoginBtn = document.getElementById('modeLoginBtn');
       const modeRegisterBtn = document.getElementById('modeRegisterBtn');
@@ -2594,9 +2641,9 @@
       const phoneInput = document.getElementById('authPhoneDigits');
       const pinInput = document.getElementById('authPinCode');
 
-      document.getElementById('serverSaveGoldBtn').addEventListener('click', () => {
+      document.getElementById('authToggleBtn').addEventListener('click', () => {
         if (authToken) {
-          syncSaveToServer(true);
+          handleLogout(false);
         } else {
           setAuthMode(false);
           authModal.classList.remove('hidden');
@@ -2783,19 +2830,26 @@
         requestAnimationFrame(gameLoop);
       }
 
-      window.onload = async function () {
+      async function initGame() {
         resizeCanvas();
         updateAuthHeaderUI();
         updateUI();
+        requestAnimationFrame(gameLoop);
+
         if (authToken) {
-          await loadFromServer();
+          loadFromServer();
         }
         fetchAndRenderRanking(false);
         setTimeout(() => {
           if (state.bgmEnabled) startBGM();
         }, 800);
-        requestAnimationFrame(gameLoop);
-      };
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initGame);
+      } else {
+        initGame();
+      }
     })();
   </script>
 </body>
