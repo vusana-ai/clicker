@@ -2487,7 +2487,7 @@
                 <span class="text-xs sm:text-sm font-extrabold text-slate-100">${r.icon} ${r.name}</span>
                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${
                   active ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : unlocked ? 'bg-slate-800 text-slate-300' : 'bg-rose-950/60 text-rose-300 border border-rose-800/50'
-                }">${active ? '훈련 중' : unlocked ? '입장 가능' : isVipOnly ? 'VIP 락' : `필요 파워 ${formatNumber(r.reqPower)}`}</span>
+                }">${active ? '훈련 중' : unlocked ? '입장 가능' : isVipOnly ? 'VIP 전용' : `필요 파워 ${formatNumber(r.reqPower)}`}</span>
               </div>
               <div class="text-[11px] font-bold text-amber-300/90 mt-1">출현 몬스터: ${r.monsterName}</div>
               <p class="text-[11px] text-slate-400 mt-0.5">${r.desc}</p>
