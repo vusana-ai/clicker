@@ -232,18 +232,21 @@
       <div id="rankingPanel" class="hidden flex-col gap-3">
         <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-950/90 border border-slate-800 rounded-xl px-3.5 py-2.5">
           <div>
-            <div class="text-xs sm:text-sm font-extrabold text-amber-300">👑 왕국 명예의 전당 (실시간 통합 순위)</div>
-            <div class="text-[11px] text-slate-400 mt-0.5">정렬 기준: 1순위 명예 레벨 · 2순위 누적 파워 (전화번호 가운데 자리 보호)</div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs sm:text-sm font-extrabold text-amber-300">👑 왕국 명예의 전당 (실시간 통합 순위)</span>
+              <span id="rankingLastUpdated" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold">자동 갱신 대기</span>
+            </div>
+            <div class="text-[11px] text-slate-400 mt-0.5">정렬 기준: 1순위 명예 레벨 · 2순위 누적 파워 (30초마다 자동 갱신)</div>
           </div>
-          <button id="refreshRankingBtn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition active:scale-95">
-            🔄 새로고침
+          <button id="refreshRankingBtn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition active:scale-95 cursor-pointer">
+            🔄 즉시 갱신
           </button>
         </div>
 
         <!-- 내 현재 순위 요약 박스 -->
         <div id="myRankSummaryBox" class="rounded-xl bg-gradient-to-r from-sky-950/50 via-slate-950 to-slate-950 border border-sky-500/35 px-3.5 py-2.5 flex items-center justify-between text-xs">
           <span class="text-slate-300 font-semibold">내 현재 순위:</span>
-          <span id="myRankDetailText" class="font-extrabold text-sky-300">로그인 후 [서버저장] 시 순위에 등록됩니다</span>
+          <span id="myRankDetailText" class="font-extrabold text-sky-300">로그인 시 실시간으로 순위가 자동 반영됩니다</span>
         </div>
 
         <!-- 전체 랭킹 리스트 -->
@@ -615,7 +618,10 @@
             body: JSON.stringify({
               gameId: GAME_ID,
               saveData: state,
-              score: state.power
+              score: state.power,
+              honorLevel: state.honorLevel,
+              equippedWeaponId: state.equippedWeaponId,
+              currentRegionId: state.currentRegionId
             })
           });
           if (res.status === 401 || res.status === 403) {
@@ -626,7 +632,7 @@
           if (res.ok) {
             hasUnsavedChanges = false;
             if (showNotification) showToast(`🟨 [${currentUsername}] 클라우드 서버에 데이터가 안전하게 저장되었습니다!`);
-            fetchAndRenderRanking();
+            await fetchAndRenderRanking(false);
           }
         } catch (err) {
         }
@@ -644,8 +650,9 @@
           }
           const data = await res.json();
           if (res.ok && data.saveData) {
+            const parsedSave = typeof data.saveData === 'string' ? JSON.parse(data.saveData) : data.saveData;
             const wasVip = state.isVip;
-            state = sanitizeState({ ...(data.saveData || {}), isVip: Boolean(data.isVip || data.saveData?.isVip) });
+            state = sanitizeState({ ...(parsedSave || {}), isVip: Boolean(data.isVip || parsedSave?.isVip) });
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             if (!wasVip && state.isVip) {
               syncSaveToServer(false);
@@ -795,8 +802,37 @@
       });
 
       // ==========================================
-      // 2-3. 명예의 전당(랭킹) 조회 및 렌더링
+      // 2-3. 명예의 전당(랭킹) 조회 및 렌더링 (데이터 추출 보정 포함)
       // ==========================================
+      function extractRankItemFields(item) {
+        let sd = item?.saveData ?? item?.save_data ?? {};
+        if (typeof sd === 'string') {
+          try { sd = JSON.parse(sd); } catch (e) { sd = {}; }
+        }
+
+        const isMe = Boolean(
+          item?.isMe ||
+          (currentUsername && item?.username && item.username === currentUsername) ||
+          (currentUsername && item?.maskedName && maskPhoneMiddle(item.maskedName) === maskPhoneMiddle(currentUsername))
+        );
+
+        // 서버 응답에서 우선 추출하고, 본인(isMe)인데 서버 값이 비어 있으면 현재 로컬 state로 보정
+        const rawHonor = item?.honorLevel ?? item?.honor_level ?? sd?.honorLevel ?? sd?.honor_level;
+        const honorLevel = rawHonor !== undefined && rawHonor !== null
+          ? Number(rawHonor)
+          : (isMe ? Number(state.honorLevel || 0) : 0);
+
+        const rawPower = item?.power ?? sd?.power ?? item?.score;
+        const power = rawPower !== undefined && rawPower !== null
+          ? Math.max(Number(rawPower), isMe ? Number(state.power || 0) : 0)
+          : (isMe ? Number(state.power || 0) : 0);
+
+        const weaponId = item?.equippedWeaponId ?? item?.equipped_weapon_id ?? sd?.equippedWeaponId ?? sd?.equipped_weapon_id ?? (isMe ? state.equippedWeaponId : null);
+        const regionId = item?.currentRegionId ?? item?.current_region_id ?? sd?.currentRegionId ?? sd?.current_region_id ?? (isMe ? state.currentRegionId : null);
+
+        return { isMe, honorLevel, power, weaponId, regionId };
+      }
+
       async function fetchAndRenderRanking(showToastMsg = false) {
         const listContainer = document.getElementById('rankingListContainer');
         const tickerText = document.getElementById('topPlayerTickerText');
@@ -805,55 +841,77 @@
 
         try {
           const headers = authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
-          const res = await fetch(`${API_BASE_URL}/api/ranking?gameId=${GAME_ID}`, { headers });
+          const res = await fetch(`${API_BASE_URL}/api/ranking?gameId=${GAME_ID}&_t=${Date.now()}`, {
+            headers,
+            cache: 'no-store'
+          });
           const data = await res.json();
 
           if (!res.ok) throw new Error(data.error || '랭킹 로드 실패');
 
-          const rankings = data.rankings || [];
-          const myRank = data.myRank;
+          // 각 항목 필드 정규화 후 명예 레벨 > 누적 파워 순으로 클라이언트 측 재정렬 보장
+          const rawRankings = data.rankings || [];
+          const normalizedRankings = rawRankings.map((item, idx) => {
+            const fields = extractRankItemFields(item);
+            return {
+              ...item,
+              ...fields,
+              originalRank: item.rank ?? (idx + 1)
+            };
+          });
 
-          if (rankings.length > 0) {
-            const top1 = rankings[0];
-            const topWId = top1.equippedWeaponId ?? top1.saveData?.equippedWeaponId;
-            const topHonor = top1.honorLevel ?? top1.saveData?.honorLevel ?? 0;
-            const topPower = top1.power ?? top1.saveData?.power ?? top1.score ?? 0;
-            const topWeapon = WEAPONS.find(w => w.id === topWId) || WEAPONS[0];
-            tickerText.textContent = `현재 1위: ${maskPhoneMiddle(top1.maskedName)} (👑 명예 Lv.${topHonor} · ⚡ ${formatNumber(topPower)} · 🗡️ ${topWeapon.name})`;
+          normalizedRankings.sort((a, b) => {
+            if (b.honorLevel !== a.honorLevel) return b.honorLevel - a.honorLevel;
+            return b.power - a.power;
+          });
+
+          normalizedRankings.forEach((item, idx) => {
+            item.rank = idx + 1;
+          });
+
+          const myItem = normalizedRankings.find(r => r.isMe) || (data.myRank ? { ...data.myRank, ...extractRankItemFields({ ...data.myRank, isMe: true }) } : null);
+
+          if (normalizedRankings.length > 0) {
+            const top1 = normalizedRankings[0];
+            const topWeapon = WEAPONS.find(w => w.id === top1.weaponId) || WEAPONS[0];
+            tickerText.textContent = `현재 1위: ${maskPhoneMiddle(top1.maskedName)} (👑 명예 Lv.${top1.honorLevel} · ⚡ ${formatNumber(top1.power)} · 🗡️ ${topWeapon.name})`;
           } else {
             tickerText.textContent = '아직 등록된 용사가 없습니다. 첫 번째 랭킹 1위에 도전하세요!';
           }
 
-          if (myRank) {
-            const myHonor = myRank.honorLevel ?? myRank.saveData?.honorLevel ?? state.honorLevel ?? 0;
-            const myPower = myRank.power ?? myRank.saveData?.power ?? myRank.score ?? state.power ?? 0;
-            quickBadge.textContent = `내 순위: ${myRank.rank}위 →`;
-            myRankDetail.textContent = `전체 ${data.totalPlayers || rankings.length}명 중 ${myRank.rank}위 (명예 Lv.${myHonor} · 파워 ${formatNumber(myPower)})`;
+          if (myItem) {
+            quickBadge.textContent = `내 순위: ${myItem.rank}위 →`;
+            myRankDetail.textContent = `전체 ${data.totalPlayers || normalizedRankings.length}명 중 ${myItem.rank}위 (명예 Lv.${myItem.honorLevel} · 파워 ${formatNumber(myItem.power)})`;
           } else if (authToken) {
-            quickBadge.textContent = '순위 반영 대기 →';
-            myRankDetail.textContent = '상단 [서버저장]을 누르면 최신 점수로 순위가 반영됩니다';
+            quickBadge.textContent = '순위 반영 중 →';
+            myRankDetail.textContent = '플레이 데이터가 서버에 자동 동기화되면 순위가 표시됩니다';
           } else {
             quickBadge.textContent = '로그인 후 등록 →';
-            myRankDetail.textContent = '상단 골드바 [서버저장]으로 계정을 연결하면 랭킹에 등록됩니다';
+            myRankDetail.textContent = '우측 상단 골드바 [로그인] 연결 시 실시간 순위에 등록됩니다';
+          }
+
+          const updatedEl = document.getElementById('rankingLastUpdated');
+          if (updatedEl) {
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            const ss = String(now.getSeconds()).padStart(2, '0');
+            updatedEl.textContent = `${hh}:${mm}:${ss} 갱신됨`;
           }
 
           listContainer.innerHTML = '';
-          if (rankings.length === 0) {
+          if (normalizedRankings.length === 0) {
             listContainer.innerHTML = `
               <div class="text-center py-8 text-xs text-slate-400 bg-slate-950/60 rounded-xl border border-slate-800">
-                등록된 용사 기록이 없습니다. 우측 상단 <strong class="text-amber-300">[서버저장]</strong>을 눌러 첫 주인공이 되어보세요!
+                등록된 용사 기록이 없습니다. 우측 상단 <strong class="text-amber-300">[로그인]</strong> 후 첫 주인공이 되어보세요!
               </div>
             `;
             return;
           }
 
-          rankings.forEach((item) => {
-            const itemWId = item.equippedWeaponId ?? item.saveData?.equippedWeaponId;
-            const itemRId = item.currentRegionId ?? item.saveData?.currentRegionId;
-            const itemHonor = item.honorLevel ?? item.saveData?.honorLevel ?? 0;
-            const itemPower = item.power ?? item.saveData?.power ?? item.score ?? 0;
-            const wInfo = WEAPONS.find(w => w.id === itemWId) || WEAPONS[0];
-            const rInfo = REGIONS.find(r => r.id === itemRId) || REGIONS[0];
+          normalizedRankings.forEach((item) => {
+            const wInfo = WEAPONS.find(w => w.id === item.weaponId) || WEAPONS[0];
+            const rInfo = REGIONS.find(r => r.id === item.regionId) || REGIONS[0];
 
             let rankBadgeHtml = `<span class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 font-extrabold text-xs flex items-center justify-center shrink-0">${item.rank}</span>`;
             let cardStyle = 'bg-slate-950/80 border-slate-800';
@@ -889,8 +947,8 @@
                 </div>
               </div>
               <div class="text-right shrink-0">
-                <div class="text-xs font-black text-amber-400">👑 명예 Lv.${itemHonor}</div>
-                <div class="text-[11px] font-bold text-sky-300 mt-0.5">⚡ ${formatNumber(itemPower)} 파워</div>
+                <div class="text-xs font-black text-amber-400">👑 명예 Lv.${item.honorLevel}</div>
+                <div class="text-[11px] font-bold text-sky-300 mt-0.5">⚡ ${formatNumber(item.power)} 파워</div>
               </div>
             `;
             listContainer.appendChild(rowEl);
@@ -907,11 +965,28 @@
         }
       }
 
-      setInterval(() => {
+      async function syncAndRefreshRanking(showToastMsg = false) {
         if (authToken && hasUnsavedChanges) {
+          await syncSaveToServer(false);
+          if (showToastMsg) showToast('🏆 내 최신 점수를 반영하고 랭킹을 갱신했습니다!');
+        } else {
+          await fetchAndRenderRanking(showToastMsg);
+        }
+      }
+
+      // 5초마다 미저장 변경사항 서버 자동 동기화
+      setInterval(() => {
+        if (authToken && hasUnsavedChanges && !document.hidden) {
           syncSaveToServer(false);
         }
-      }, 10000);
+      }, 5000);
+
+      // 30초마다 전체 랭킹 자동 갱신
+      setInterval(() => {
+        if (!document.hidden) {
+          fetchAndRenderRanking(false);
+        }
+      }, 30000);
 
       function updateAuthHeaderUI() {
         const userBadge = document.getElementById('userBadge');
@@ -938,7 +1013,7 @@
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(USER_KEY);
         updateAuthHeaderUI();
-        fetchAndRenderRanking();
+        fetchAndRenderRanking(false);
         showToast(expired ? '로그인 정보가 만료되었습니다.' : '로그아웃되었습니다.');
       }
 
@@ -1778,7 +1853,6 @@
           ctx.fillStyle = '#92400e';
           ctx.fillRect(-18, -26, 16, 26); ctx.fillRect(14, -28, 18, 28);
 
-          // 목 + 황금 비늘 하이라이트
           const neckGrad = ctx.createLinearGradient(-34, -130 + bob, 4, -74 + bob);
           neckGrad.addColorStop(0, '#f59e0b'); neckGrad.addColorStop(1, '#b45309');
           ctx.fillStyle = neckGrad;
@@ -1787,7 +1861,6 @@
           ctx.lineTo(-10, -122 + bob); ctx.quadraticCurveTo(-6, -96 + bob, 4, -74 + bob);
           ctx.closePath(); ctx.fill();
 
-          // 뒤쪽 보조 뿔 & 메인 황금 왕관 뿔
           ctx.fillStyle = '#d97706';
           ctx.beginPath();
           ctx.moveTo(-14, -130 + bob); ctx.quadraticCurveTo(4, -150 + bob, 18, -154 + bob); ctx.lineTo(-4, -124 + bob);
@@ -1801,7 +1874,6 @@
           ctx.quadraticCurveTo(2, -146 + bob, -10, -126 + bob);
           ctx.closePath(); ctx.fill();
 
-          // 아래턱 (포효하는 입)
           ctx.fillStyle = '#b45309';
           ctx.beginPath();
           ctx.moveTo(-28, -118 + bob);
@@ -1810,23 +1882,21 @@
           ctx.lineTo(-22, -108 + bob);
           ctx.closePath(); ctx.fill();
 
-          // 위턱 & 용의 두상 (날카로운 콧등과 눈썹 능선)
           const headGrad = ctx.createLinearGradient(-64, -136 + bob, -10, -112 + bob);
           headGrad.addColorStop(0, '#fef08a'); headGrad.addColorStop(0.5, '#f59e0b'); headGrad.addColorStop(1, '#b45309');
           ctx.fillStyle = headGrad;
           ctx.beginPath();
           ctx.moveTo(-12, -126 + bob);
-          ctx.lineTo(-26, -138 + bob); // 이마 능선
-          ctx.lineTo(-42, -132 + bob); // 눈썹 뼈
-          ctx.lineTo(-62, -124 + bob); // 콧등 끝
-          ctx.lineTo(-66, -117 + bob); // 코끝
-          ctx.lineTo(-56, -114 + bob); // 윗입술
-          ctx.lineTo(-26, -117 + bob); // 입안쪽
-          ctx.lineTo(-14, -114 + bob); // 턱관절
+          ctx.lineTo(-26, -138 + bob);
+          ctx.lineTo(-42, -132 + bob);
+          ctx.lineTo(-62, -124 + bob);
+          ctx.lineTo(-66, -117 + bob);
+          ctx.lineTo(-56, -114 + bob);
+          ctx.lineTo(-26, -117 + bob);
+          ctx.lineTo(-14, -114 + bob);
           ctx.closePath(); ctx.fill();
           ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 1.2; ctx.stroke();
 
-          // 콧등 위 작은 뿔 & 뺨 가시
           ctx.fillStyle = '#fef08a';
           ctx.beginPath();
           ctx.moveTo(-58, -125 + bob); ctx.lineTo(-64, -133 + bob); ctx.lineTo(-52, -126 + bob);
@@ -1837,7 +1907,6 @@
           ctx.moveTo(-18, -118 + bob); ctx.lineTo(-4, -118 + bob); ctx.lineTo(-14, -110 + bob);
           ctx.closePath(); ctx.fill();
 
-          // 날카로운 송곳니 (위/아래)
           ctx.fillStyle = '#ffffff';
           ctx.beginPath();
           ctx.moveTo(-56, -115 + bob); ctx.lineTo(-54, -109 + bob); ctx.lineTo(-51, -115 + bob);
@@ -1845,7 +1914,6 @@
           ctx.moveTo(-54, -105 + bob); ctx.lineTo(-52, -110 + bob); ctx.lineTo(-49, -105 + bob);
           ctx.closePath(); ctx.fill();
 
-          // 날카롭게 빛나는 용의 눈 (붉은 광채 + 황금 동공)
           ctx.fillStyle = '#451a03';
           ctx.beginPath();
           ctx.moveTo(-43, -128 + bob); ctx.lineTo(-31, -131 + bob); ctx.lineTo(-34, -123 + bob);
@@ -1860,7 +1928,6 @@
           ctx.beginPath(); ctx.arc(-36, -126.5 + bob, 1.3, 0, Math.PI * 2); ctx.fill();
           ctx.shadowBlur = 0;
 
-          // 입에서 뿜어져 나오는 황금 화염 숨결
           if (Math.random() < 0.65) {
             const flameGrad = ctx.createLinearGradient(-56, -112 + bob, -86, -108 + bob);
             flameGrad.addColorStop(0, '#ffffff');
@@ -2031,11 +2098,11 @@
         if (anim.swingProgress > 0) {
           const s = Math.sin(anim.swingProgress * Math.PI);
           if (anim.attackPattern === 0) {
-            swingAngle = -0.65 + s * 2.35; // 패턴 1: 내려베기
+            swingAngle = -0.65 + s * 2.35;
           } else if (anim.attackPattern === 1) {
-            swingAngle = 1.65 - s * 2.55;  // 패턴 2: 점프 올려베기
+            swingAngle = 1.65 - s * 2.55;
           } else {
-            swingAngle = Math.PI * 0.48;   // 패턴 3: 수평 돌진 찌르기
+            swingAngle = Math.PI * 0.48;
           }
         }
         ctx.rotate(swingAngle);
@@ -2124,7 +2191,6 @@
           ctx.shadowBlur = 16;
 
           if (anim.attackPattern === 2) {
-            // 패턴 3: 돌진 찌르기 관통 섬광 + 스피드 라인
             const beamLen = 92 + weapon.tier * 10;
             ctx.globalAlpha = slashAlpha * 0.92;
             ctx.fillStyle = weapon.slashColor;
@@ -2154,7 +2220,6 @@
             ctx.moveTo(-35, 18); ctx.lineTo(48, 18);
             ctx.stroke();
           } else {
-            // 패턴 1 (내려베기) / 패턴 2 (올려베기) 호 궤적
             const arcRadius = 62 + weapon.tier * 5;
             const startAng = anim.attackPattern === 1 ? -1.15 : -0.95;
             const endAng = anim.attackPattern === 1 ? 0.65 : 0.9;
@@ -2554,7 +2619,7 @@
         } else if (tabName === 'ranking') {
           tabRankingBtn.className = 'flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs font-extrabold bg-slate-800 text-sky-300 shadow transition';
           rankingPanel.classList.remove('hidden'); rankingPanel.classList.add('flex');
-          fetchAndRenderRanking(false);
+          syncAndRefreshRanking(false);
         }
       }
 
@@ -2568,7 +2633,7 @@
       });
 
       document.getElementById('refreshRankingBtn').addEventListener('click', () => {
-        fetchAndRenderRanking(true);
+        syncAndRefreshRanking(true);
       });
 
       canvasWrapper.addEventListener('pointerdown', (e) => {
@@ -2742,7 +2807,8 @@
 
           if (!isRegisterMode) {
             if (data.saveData) {
-              state = sanitizeState({ ...(data.saveData || {}), isVip: Boolean(data.isVip || data.saveData?.isVip) });
+              const parsedSave = typeof data.saveData === 'string' ? JSON.parse(data.saveData) : data.saveData;
+              state = sanitizeState({ ...(parsedSave || {}), isVip: Boolean(data.isVip || parsedSave?.isVip) });
               localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
               if (state.isVip) {
                 await syncSaveToServer(false);
@@ -2775,7 +2841,7 @@
           );
         } catch (err) {
           authErrorMsg.textContent = '클라우드 게임 서버와 연결할 수 없습니다.';
-          authErrorMsg.classList.add('hidden');
+          authErrorMsg.classList.remove('hidden');
         }
       });
 
@@ -2837,7 +2903,7 @@
         requestAnimationFrame(gameLoop);
 
         if (authToken) {
-          loadFromServer();
+          await loadFromServer();
         }
         fetchAndRenderRanking(false);
         setTimeout(() => {
