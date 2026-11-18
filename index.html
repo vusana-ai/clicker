@@ -139,7 +139,7 @@
             <div class="text-xs sm:text-sm font-extrabold text-emerald-400 mt-0.5 leading-snug" id="gainPerClickDisplay">+1 파워 / +1 G</div>
           </div>
           <div class="bg-slate-950/80 border border-slate-800/90 rounded-xl px-3 py-2.5 flex flex-col justify-center">
-            <div class="text-[11px] text-slate-400 font-medium">장착 무기</div>
+            <div class="text-[11px] text-slate-400 font-medium">장착 무기 / 펫</div>
             <div class="text-xs sm:text-sm font-bold text-purple-300 truncate mt-0.5" id="equippedWeaponDisplay">목검 (x1)</div>
           </div>
         </div>
@@ -177,6 +177,9 @@
           <span id="arenaMonsterPill" class="px-2.5 py-1 rounded-lg bg-rose-950/75 border border-rose-700/70 backdrop-blur-sm text-[11px] font-extrabold text-rose-200 shadow">
             🎯 허수아비
           </span>
+          <span id="arenaPetPill" class="px-2.5 py-1 rounded-lg bg-pink-950/75 border border-pink-700/70 backdrop-blur-sm text-[11px] font-extrabold text-pink-200 shadow">
+            💧 아기 슬라임 응원중
+          </span>
         </div>
 
         <div id="comboBadge" class="pointer-events-none absolute top-3 right-3 opacity-0 transition-opacity duration-150 bg-slate-950/85 border border-amber-500/50 backdrop-blur-sm px-3 py-1.5 rounded-xl text-right shadow-lg">
@@ -192,7 +195,7 @@
       </div>
     </section>
 
-    <!-- Action & Shop / Region / Ranking Tabs -->
+    <!-- Action & Shop / Region / Pet / Ranking Tabs -->
     <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl shadow-black/30 flex flex-col gap-3.5">
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
         <!-- 8 : 2 비율 타격하기 버튼 + VIP 자동클릭 버튼 -->
@@ -212,14 +215,17 @@
           </button>
         </div>
 
-        <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 shrink-0">
-          <button id="tabRegionsBtn" type="button" class="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs font-extrabold bg-slate-800 text-emerald-300 shadow transition">
+        <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 shrink-0 overflow-x-auto">
+          <button id="tabRegionsBtn" type="button" class="flex-1 sm:flex-initial px-3 py-2 rounded-lg text-xs font-extrabold bg-slate-800 text-emerald-300 shadow transition whitespace-nowrap cursor-pointer">
             🗺️ 훈련 지역
           </button>
-          <button id="tabWeaponsBtn" type="button" class="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition">
+          <button id="tabWeaponsBtn" type="button" class="flex-1 sm:flex-initial px-3 py-2 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition whitespace-nowrap cursor-pointer">
             🗡️ 무기 상점
           </button>
-          <button id="tabRankingBtn" type="button" class="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition">
+          <button id="tabPetsBtn" type="button" class="flex-1 sm:flex-initial px-3 py-2 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition whitespace-nowrap cursor-pointer">
+            🐾 애완동물
+          </button>
+          <button id="tabRankingBtn" type="button" class="flex-1 sm:flex-initial px-3 py-2 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition whitespace-nowrap cursor-pointer">
             🏆 랭킹
           </button>
         </div>
@@ -227,6 +233,7 @@
 
       <div id="regionsPanel" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
       <div id="weaponsPanel" class="hidden grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
+      <div id="petsPanel" class="hidden grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
 
       <!-- 명예의 전당 랭킹 패널 -->
       <div id="rankingPanel" class="hidden flex-col gap-3">
@@ -302,14 +309,14 @@
         <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5">
           <div class="text-xs font-extrabold text-purple-300 mb-2.5 flex items-center gap-1.5">
             <span>✨</span>
-            <span>VIP 전용 핵심 혜택 3종</span>
+            <span>VIP 전용 핵심 혜택</span>
           </div>
           <ul class="flex flex-col gap-2">
             <li class="flex items-center gap-3 bg-slate-900/90 border border-slate-800/90 rounded-xl px-3 py-2.5">
               <span class="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/35 flex items-center justify-center text-base shrink-0">🗡️</span>
               <div class="min-w-0">
-                <div class="text-xs sm:text-sm font-extrabold text-slate-100">빛의 검 즉시 해금</div>
-                <div class="text-[11px] text-slate-400">오직 VIP만 사용 가능한 최고 티어 성물 [빛의 검] 즉시 획득 & 장착</div>
+                <div class="text-xs sm:text-sm font-extrabold text-slate-100">빛의 검 & 황금 해태 펫 즉시 해금</div>
+                <div class="text-[11px] text-slate-400">최고 티어 성물 [빛의 검]과 VIP 전용 응원 펫 [황금 해태] 즉시 획득</div>
               </div>
             </li>
             <li class="flex items-center gap-3 bg-slate-900/90 border border-slate-800/90 rounded-xl px-3 py-2.5">
@@ -476,7 +483,7 @@
       });
 
       // ==========================================
-      // 1. 클라우드 서버 연결 URL, 토스페이먼츠 & 관리자 VIP 설정
+      // 1. 클라우드 서버 연결 URL, 토스페이먼츠 & 게임 데이터 설정
       // ==========================================
       const GAME_ID = 'clicker';
       const CLOUD_API_URL = 'https://02826k.duckdns.org';
@@ -533,6 +540,46 @@
         { id: 'secret_dungeon', name: '비밀던젼(황금)', icon: '👑', monsterName: '골드 드래곤', monsterType: 'gold_dragon', reqPower: 0, powerBonus: 350, goldMult: 100, skyTop: '#451a03', skyBottom: '#271201', groundTop: '#d97706', groundBottom: '#78350f', accent: '#facc15', desc: '👑 VIP 전용 - 전설의 골드 드래곤이 지키는 황금 비밀던젼', isVipOnly: true }
       ];
 
+      // 6종 응원 애완동물 정의 (주인공 뒤쪽에서 통통 튀며 응원만 담당)
+      const PETS = [
+        {
+          id: 'baby_slime', name: '아기 슬라임', icon: '💧', cost: 0,
+          bodyColor: '#38bdf8', subColor: '#bae6fd', pomColor: '#f472b6',
+          cheers: ['용사님 화이팅!💧', '말랑말랑 응원~!', '할 수 있어요!✨'],
+          desc: '주인공 뒤에서 말랑하게 통통 튀며 응원하는 귀여운 물방울 슬라임'
+        },
+        {
+          id: 'cheer_dog', name: '치어리더 시바견', icon: '🐶', cost: 5000,
+          bodyColor: '#f59e0b', subColor: '#fef3c7', pomColor: '#ef4444',
+          cheers: ['멍멍! 힘내요!🐾', '최고의 용사님!', '가즈아 멍!!🔥'],
+          desc: '붉은 응원봉을 흔들며 꼬리를 살랑거리는 열정 만점 강아지'
+        },
+        {
+          id: 'lucky_cat', name: '행운 복고양이', icon: '🐱', cost: 50000,
+          bodyColor: '#f8fafc', subColor: '#fca5a5', pomColor: '#fbbf24',
+          cheers: ['골드 쏟아져라냥!🪙', '냥냥 펀치 응원!', '대박 나라냥~💛'],
+          desc: '황금 방울을 달고 복을 불러주는 귀여운 삼색 복고양이'
+        },
+        {
+          id: 'fairy_pixie', name: '숲의 픽시 요정', icon: '🧚', cost: 250000,
+          bodyColor: '#a7f3d0', subColor: '#34d399', pomColor: '#fef08a',
+          cheers: ['반짝반짝 빛나라!✨', '요정의 축복을~!', '멋진 검술이에요!🌿'],
+          desc: '날개를 파닥이며 용사님 뒤에서 반짝이는 응원 가루를 뿌리는 요정'
+        },
+        {
+          id: 'baby_dragon', name: '불꽃 아기용', icon: '🐲', cost: 1500000,
+          bodyColor: '#fb7185', subColor: '#fef08a', pomColor: '#f97316',
+          cheers: ['크아앙! 다 부숴요!🔥', '불꽃 응원 발사!', '용사님 무적!!⚡'],
+          desc: '작은 날개로 날아오르며 폭죽 같은 불꽃 응원을 뿜어내는 아기 드래곤'
+        },
+        {
+          id: 'gold_haetae', name: '황금 해태', icon: '🦁', cost: 0, isVipOnly: true,
+          bodyColor: '#fbbf24', subColor: '#fef08a', pomColor: '#c084fc',
+          cheers: ['👑 천하무적 용사님!', '황금빛 승리!!✨', '전설의 일격!!👑'],
+          desc: '👑 VIP 전용 - 신비한 황금 오오라를 두르고 응원하는 수호신 아기 해태'
+        }
+      ];
+
       // ==========================================
       // 2. 상태 관리 및 로컬/서버 DB 저장·불러오기
       // ==========================================
@@ -543,6 +590,8 @@
         totalClicks: 0,
         ownedWeapons: ['wooden_sword'],
         equippedWeaponId: 'wooden_sword',
+        ownedPets: ['baby_slime'],
+        equippedPetId: 'baby_slime',
         currentRegionId: 'village',
         soundEnabled: true,
         bgmEnabled: true,
@@ -556,10 +605,18 @@
 
         const isVip = (typeof parsed.isVip === 'boolean' ? parsed.isVip : false) || isAdminAccount(currentUsername);
         const ownedWeapons = Array.isArray(parsed.ownedWeapons) && parsed.ownedWeapons.length > 0 ? [...parsed.ownedWeapons] : [...base.ownedWeapons];
+        const ownedPets = Array.isArray(parsed.ownedPets) && parsed.ownedPets.length > 0 ? [...parsed.ownedPets] : [...base.ownedPets];
 
         if (isVip && !ownedWeapons.includes('light_sword')) {
           ownedWeapons.push('light_sword');
         }
+        if (isVip && !ownedPets.includes('gold_haetae')) {
+          ownedPets.push('gold_haetae');
+        }
+
+        const validPetId = (parsed.equippedPetId === null || PETS.some(p => p.id === parsed.equippedPetId))
+          ? parsed.equippedPetId
+          : base.equippedPetId;
 
         return {
           power: typeof parsed.power === 'number' && parsed.power >= 1 ? Math.floor(parsed.power) : base.power,
@@ -568,6 +625,8 @@
           totalClicks: typeof parsed.totalClicks === 'number' ? parsed.totalClicks : 0,
           ownedWeapons: ownedWeapons,
           equippedWeaponId: WEAPONS.some(w => w.id === parsed.equippedWeaponId) ? parsed.equippedWeaponId : base.equippedWeaponId,
+          ownedPets: ownedPets,
+          equippedPetId: validPetId,
           currentRegionId: REGIONS.some(r => r.id === parsed.currentRegionId) ? parsed.currentRegionId : base.currentRegionId,
           soundEnabled: typeof parsed.soundEnabled === 'boolean' ? parsed.soundEnabled : true,
           bgmEnabled: typeof parsed.bgmEnabled === 'boolean' ? parsed.bgmEnabled : true,
@@ -802,7 +861,7 @@
       });
 
       // ==========================================
-      // 2-3. 명예의 전당(랭킹) 조회 및 렌더링 (데이터 추출 보정 포함)
+      // 2-3. 명예의 전당(랭킹) 조회 및 렌더링
       // ==========================================
       function extractRankItemFields(item) {
         let sd = item?.saveData ?? item?.save_data ?? {};
@@ -816,7 +875,6 @@
           (currentUsername && item?.maskedName && maskPhoneMiddle(item.maskedName) === maskPhoneMiddle(currentUsername))
         );
 
-        // 서버 응답에서 우선 추출하고, 본인(isMe)인데 서버 값이 비어 있으면 현재 로컬 state로 보정
         const rawHonor = item?.honorLevel ?? item?.honor_level ?? sd?.honorLevel ?? sd?.honor_level;
         const honorLevel = rawHonor !== undefined && rawHonor !== null
           ? Number(rawHonor)
@@ -849,7 +907,6 @@
 
           if (!res.ok) throw new Error(data.error || '랭킹 로드 실패');
 
-          // 각 항목 필드 정규화 후 명예 레벨 > 누적 파워 순으로 클라이언트 측 재정렬 보장
           const rawRankings = data.rankings || [];
           const normalizedRankings = rawRankings.map((item, idx) => {
             const fields = extractRankItemFields(item);
@@ -974,14 +1031,12 @@
         }
       }
 
-      // 5초마다 미저장 변경사항 서버 자동 동기화
       setInterval(() => {
         if (authToken && hasUnsavedChanges && !document.hidden) {
           syncSaveToServer(false);
         }
       }, 5000);
 
-      // 30초마다 전체 랭킹 자동 갱신
       setInterval(() => {
         if (!document.hidden) {
           fetchAndRenderRanking(false);
@@ -1023,6 +1078,7 @@
       function getNextHonorCost(level = state.honorLevel) { return (level + 1) * HONOR_BASE_COST; }
       function getHonorMultiplier() { return 1 + state.honorLevel * 0.15; }
       function getEquippedWeapon() { return WEAPONS.find(w => w.id === state.equippedWeaponId) || WEAPONS[0]; }
+      function getEquippedPet() { return PETS.find(p => p.id === state.equippedPetId) || null; }
       function getCurrentRegion() { return REGIONS.find(r => r.id === state.currentRegionId) || REGIONS[0]; }
 
       function getRankInfo(power) {
@@ -1191,7 +1247,7 @@
       }
 
       // ==========================================
-      // 5. 캔버스 애니메이션 & 렌더링
+      // 5. 캔버스 애니메이션 & 렌더링 (주인공 뒤쪽 응원 펫 포함)
       // ==========================================
       const canvas = document.getElementById('gameCanvas');
       const ctx = canvas.getContext('2d');
@@ -1202,6 +1258,7 @@
       const anim = {
         time: 0, heroDash: 0, swingProgress: 0, monsterHit: 0, hitFlash: 0, attackPattern: 0,
         screenShake: 0, combo: 0, comboTimer: 0,
+        petCheerBoost: 0, petBubbleTimer: 0, petBubbleText: '용사님 화이팅!',
         particles: [], floatingTexts: [], ambientParticles: [],
         shockwaves: [], slashTrails: []
       };
@@ -1576,6 +1633,261 @@
         });
       }
 
+      // 주인공 뒤쪽에서 응원만 하는 귀여운 애완동물 렌더링
+      function drawCheerPet(baseX, groundY) {
+        const pet = getEquippedPet();
+        if (!pet) return;
+
+        const isFlying = pet.id === 'fairy_pixie' || pet.id === 'baby_dragon';
+        const baseHover = isFlying ? -26 : 0;
+        const hopSpeed = 6.5 + (anim.petCheerBoost > 0 ? 5.5 : 0);
+        const hopAmp = 9 + anim.petCheerBoost * 14;
+        const bounceY = -Math.abs(Math.sin(anim.time * hopSpeed)) * hopAmp;
+        const swayX = Math.sin(anim.time * 3.5) * 4;
+        const x = baseX + swayX;
+        const y = groundY + baseHover + bounceY;
+
+        ctx.save();
+
+        // 바닥 그림자
+        const shadowScale = Math.max(0.45, 1 + (baseHover + bounceY) / 95);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.42)';
+        ctx.beginPath();
+        ctx.ellipse(x, groundY + 3, 22 * shadowScale, 6 * shadowScale, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.translate(x, y);
+
+        // VIP 황금 해태 오오라 또는 요정 후광
+        if (pet.id === 'gold_haetae' || pet.id === 'fairy_pixie') {
+          const glow = ctx.createRadialGradient(0, -22, 4, 0, -22, 38);
+          glow.addColorStop(0, pet.id === 'gold_haetae' ? 'rgba(254, 240, 138, 0.55)' : 'rgba(167, 243, 208, 0.45)');
+          glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = glow;
+          ctx.beginPath();
+          ctx.arc(0, -22, 38, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // 펫 종류별 캐릭터 드로잉
+        if (pet.id === 'baby_slime') {
+          const slimeGrad = ctx.createRadialGradient(-5, -24, 3, 0, -18, 22);
+          slimeGrad.addColorStop(0, '#e0f2fe');
+          slimeGrad.addColorStop(0.5, '#38bdf8');
+          slimeGrad.addColorStop(1, '#0284c7');
+          ctx.fillStyle = slimeGrad;
+          ctx.beginPath();
+          ctx.moveTo(-20, -4);
+          ctx.quadraticCurveTo(-22, -34, 0, -36);
+          ctx.quadraticCurveTo(22, -34, 20, -4);
+          ctx.quadraticCurveTo(0, 2, -20, -4);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = '#bae6fd';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          // 머리띠
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(0, -21, 17, Math.PI * 1.12, Math.PI * 1.88);
+          ctx.stroke();
+        } else if (pet.id === 'cheer_dog') {
+          // 꼬리
+          const tailWag = Math.sin(anim.time * 16) * 6;
+          ctx.strokeStyle = '#d97706';
+          ctx.lineWidth = 5;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(-14, -12);
+          ctx.quadraticCurveTo(-26, -24 + tailWag, -20, -32 + tailWag);
+          ctx.stroke();
+
+          // 몸통 & 머리
+          ctx.fillStyle = '#f59e0b';
+          ctx.beginPath();
+          ctx.roundRect(-14, -22, 28, 20, 8);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(2, -28, 15, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 시바견 귀
+          ctx.fillStyle = '#b45309';
+          ctx.beginPath();
+          ctx.moveTo(-10, -38); ctx.lineTo(-4, -50); ctx.lineTo(2, -40);
+          ctx.moveTo(6, -40); ctx.lineTo(13, -50); ctx.lineTo(16, -36);
+          ctx.closePath();
+          ctx.fill();
+
+          // 하얀 볼터치
+          ctx.fillStyle = '#fef3c7';
+          ctx.beginPath();
+          ctx.ellipse(5, -24, 10, 7, 0, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (pet.id === 'lucky_cat') {
+          // 꼬리
+          ctx.strokeStyle = '#f59e0b';
+          ctx.lineWidth = 4.5;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(-13, -10);
+          ctx.quadraticCurveTo(-25, -20, -18, -32);
+          ctx.stroke();
+
+          // 하얀 몸통과 머리
+          ctx.fillStyle = '#f8fafc';
+          ctx.beginPath();
+          ctx.roundRect(-14, -22, 28, 20, 9);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(1, -28, 15, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 고양이 귀 (삼색 포인트)
+          ctx.fillStyle = '#f97316';
+          ctx.beginPath();
+          ctx.moveTo(-11, -37); ctx.lineTo(-5, -50); ctx.lineTo(1, -40);
+          ctx.closePath();
+          ctx.fill();
+          ctx.fillStyle = '#1e293b';
+          ctx.beginPath();
+          ctx.moveTo(5, -40); ctx.lineTo(12, -50); ctx.lineTo(15, -36);
+          ctx.closePath();
+          ctx.fill();
+
+          // 빨간 목걸이와 황금 방울
+          ctx.fillStyle = '#ef4444';
+          ctx.fillRect(-10, -17, 20, 4);
+          ctx.fillStyle = '#fbbf24';
+          ctx.beginPath();
+          ctx.arc(2, -14, 4, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (pet.id === 'fairy_pixie') {
+          const wingFlap = Math.sin(anim.time * 18) * 8;
+          ctx.fillStyle = 'rgba(186, 230, 253, 0.75)';
+          ctx.beginPath();
+          ctx.ellipse(-12, -24, 13, 7 + wingFlap * 0.2, -0.4, 0, Math.PI * 2);
+          ctx.ellipse(-10, -14, 10, 5, -0.2, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 요정 원피스 & 머리
+          ctx.fillStyle = '#34d399';
+          ctx.beginPath();
+          ctx.moveTo(-11, -6); ctx.lineTo(0, -26); ctx.lineTo(11, -6);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.fillStyle = '#fde68a';
+          ctx.beginPath();
+          ctx.arc(0, -30, 12, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (pet.id === 'baby_dragon') {
+          const flap = Math.sin(anim.time * 14) * 7;
+          ctx.fillStyle = '#f97316';
+          ctx.beginPath();
+          ctx.moveTo(-6, -24);
+          ctx.lineTo(-24, -38 + flap);
+          ctx.lineTo(-16, -16);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.fillStyle = '#e11d48';
+          ctx.beginPath();
+          ctx.ellipse(0, -15, 15, 13, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(3, -29, 13, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 작은 뿔
+          ctx.fillStyle = '#fef08a';
+          ctx.beginPath();
+          ctx.moveTo(-4, -39); ctx.lineTo(-8, -49); ctx.lineTo(1, -40);
+          ctx.moveTo(6, -39); ctx.lineTo(11, -49); ctx.lineTo(12, -37);
+          ctx.closePath();
+          ctx.fill();
+        } else if (pet.id === 'gold_haetae') {
+          // 황금 해태 몸통 & 갈기
+          const goldGrad = ctx.createLinearGradient(-16, -42, 16, 0);
+          goldGrad.addColorStop(0, '#fef08a');
+          goldGrad.addColorStop(0.5, '#fbbf24');
+          goldGrad.addColorStop(1, '#b45309');
+          ctx.fillStyle = goldGrad;
+          ctx.beginPath();
+          ctx.roundRect(-16, -24, 32, 22, 10);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(2, -30, 16, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 해태 이마 외뿔 & 미니 왕관
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.moveTo(0, -44); ctx.lineTo(4, -56); ctx.lineTo(8, -44);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        // 공통 귀여운 눈 & 발그레한 볼
+        const eyeY = pet.id === 'baby_slime' ? -20 : -29;
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(-1, eyeY, 2.2, 0, Math.PI * 2);
+        ctx.arc(8, eyeY, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(244, 63, 94, 0.55)';
+        ctx.beginPath();
+        ctx.arc(-4, eyeY + 4, 3, 0, Math.PI * 2);
+        ctx.arc(11, eyeY + 4, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 양손 치어리딩 응원봉(폼폼) 흔들기 모션
+        const wave = Math.sin(anim.time * 12) * 10;
+        const pomY = (pet.id === 'baby_slime' ? -18 : -22) - (anim.petCheerBoost * 8);
+        [
+          { px: -17, py: pomY + wave * 0.6 },
+          { px: 19, py: pomY - wave * 0.6 }
+        ].forEach(pos => {
+          ctx.fillStyle = pet.pomColor;
+          ctx.beginPath();
+          ctx.arc(pos.px, pos.py, 6.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.4;
+          ctx.stroke();
+        });
+
+        // 머리 위 응원 말풍선 표시
+        const showBubble = anim.petBubbleTimer > 0 || (Math.sin(anim.time * 1.6) > 0.35);
+        if (showBubble) {
+          const msg = anim.petBubbleTimer > 0
+            ? anim.petBubbleText
+            : pet.cheers[Math.floor(anim.time * 0.5) % pet.cheers.length];
+
+          ctx.font = '800 11px "Noto Sans KR", sans-serif';
+          const textW = Math.max(76, ctx.measureText(msg).width + 16);
+          const bx = -textW / 2 + 4;
+          const by = -76;
+
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+          ctx.strokeStyle = pet.pomColor;
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.roundRect(bx, by, textW, 22, 8);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#fef08a';
+          ctx.textAlign = 'center';
+          ctx.fillText(msg, bx + textW / 2, by + 15);
+        }
+
+        ctx.restore();
+      }
+
       function drawMonster(baseX, groundY, region) {
         const hitShakeX = anim.monsterHit > 0 ? Math.sin(anim.monsterHit * 45) * 13 * anim.monsterHit : 0;
         const hitScaleX = 1 + Math.sin(anim.monsterHit * Math.PI) * 0.15;
@@ -1863,7 +2175,8 @@
 
           ctx.fillStyle = '#d97706';
           ctx.beginPath();
-          ctx.moveTo(-14, -130 + bob); ctx.quadraticCurveTo(4, -150 + bob, 18, -154 + bob); ctx.lineTo(-4, -124 + bob);
+          ctx.moveTo(-14, -130 + bob); ctx.quadraticCurveTo(4, -150 + bob, 18, -154 + bob);
+          ctx.lineTo(-4, -124 + bob);
           ctx.closePath(); ctx.fill();
 
           const hornGrad = ctx.createLinearGradient(-22, -134 + bob, 20, -172 + bob);
@@ -2293,6 +2606,7 @@
       function performHit(clientX = null, clientY = null) {
         const weapon = getEquippedWeapon();
         const region = getCurrentRegion();
+        const pet = getEquippedPet();
         const { powerGain, goldGain } = getClickRewards();
 
         state.power += powerGain;
@@ -2307,6 +2621,15 @@
         anim.screenShake = Math.min(9, 3 + weapon.tier * 0.9);
         anim.combo += 1;
         anim.comboTimer = 1.6;
+
+        // 타격 시 뒤쪽 애완동물 응원 점프 & 응원 멘트 활성화
+        if (pet) {
+          anim.petCheerBoost = 1.0;
+          if (anim.petBubbleTimer <= 0.2 || Math.random() < 0.35) {
+            anim.petBubbleText = pet.cheers[Math.floor(Math.random() * pet.cheers.length)];
+            anim.petBubbleTimer = 1.3;
+          }
+        }
 
         playSlashSound(weapon.tier);
 
@@ -2368,6 +2691,7 @@
 
       function updateUI() {
         const weapon = getEquippedWeapon();
+        const pet = getEquippedPet();
         const region = getCurrentRegion();
         const { powerGain, goldGain } = getClickRewards();
         const { current, next } = getRankInfo(state.power);
@@ -2420,10 +2744,19 @@
 
         document.getElementById('rankDisplay').textContent = `Lv.${current.level} ${current.title}`;
         document.getElementById('gainPerClickDisplay').textContent = `+${formatNumber(powerGain)} 파워 / +${formatNumber(goldGain)} G`;
-        document.getElementById('equippedWeaponDisplay').textContent = `${weapon.name} (x${weapon.powerMult})`;
+        document.getElementById('equippedWeaponDisplay').textContent = `${weapon.name} · ${pet ? pet.icon + pet.name : '펫 없음'}`;
         document.getElementById('stageBadge').textContent = `훈련 지역: ${region.name} · 대상: ${region.monsterName}`;
         document.getElementById('arenaRegionPill').textContent = `${region.icon} ${region.name}`;
         document.getElementById('arenaMonsterPill').textContent = `🎯 ${region.monsterName}`;
+
+        const arenaPetPill = document.getElementById('arenaPetPill');
+        if (pet) {
+          arenaPetPill.classList.remove('hidden');
+          arenaPetPill.textContent = `${pet.icon} ${pet.name} 응원중`;
+        } else {
+          arenaPetPill.classList.add('hidden');
+        }
+
         document.getElementById('trainBtnLabel').textContent = `${region.monsterName} 타격하기 (+${formatNumber(powerGain)} 파워)`;
 
         if (next) {
@@ -2451,6 +2784,7 @@
 
         renderWeaponsPanel();
         renderRegionsPanel();
+        renderPetsPanel();
       }
 
       function renderWeaponsPanel() {
@@ -2529,6 +2863,99 @@
         });
       }
 
+      // 애완동물 탭 렌더링 (주인공 뒤쪽에서 응원하는 6종 펫 선택/분양)
+      function renderPetsPanel() {
+        const panel = document.getElementById('petsPanel');
+        if (!panel) return;
+        panel.innerHTML = '';
+
+        PETS.forEach(pet => {
+          const owned = state.ownedPets.includes(pet.id);
+          const equipped = state.equippedPetId === pet.id;
+          const isVipOnly = pet.isVipOnly === true;
+          const canBuy = !owned && state.gold >= pet.cost && !isVipOnly;
+
+          let actionLabel = pet.cost === 0 ? '무료 분양받기' : `분양받기 (${formatNumber(pet.cost)} G)`;
+          if (isVipOnly) {
+            actionLabel = state.isVip ? '동행하기' : '👑 VIP 전용';
+          }
+
+          const card = document.createElement('div');
+          card.className = `rounded-xl p-3 border transition flex flex-col justify-between gap-2.5 ${
+            equipped ? 'bg-pink-950/25 border-pink-500/60 shadow-md shadow-pink-500/10' : owned ? 'bg-slate-950/85 border-slate-700/80' : 'bg-slate-950/60 border-slate-800/90'
+          }`;
+          card.innerHTML = `
+            <div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs sm:text-sm font-extrabold text-slate-100 flex items-center gap-1.5">
+                  <span class="text-base">${pet.icon}</span>
+                  <span>${pet.name}</span>
+                </span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                  equipped ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40' : owned ? 'bg-slate-800 text-slate-300' : isVipOnly ? 'bg-fuchsia-950 text-fuchsia-300 border border-fuchsia-800/40' : 'bg-slate-900 text-slate-400 border border-slate-800'
+                }">${equipped ? '응원 중' : owned ? '보유 중' : isVipOnly ? 'VIP 펫' : '미보유'}</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">${pet.desc}</p>
+              <div class="mt-2 flex flex-wrap gap-1.5 text-[10px] font-bold">
+                <span class="px-1.5 py-0.5 rounded bg-pink-500/10 text-pink-300 border border-pink-500/25">📣 "${pet.cheers[0]}"</span>
+              </div>
+            </div>
+            <button type="button" class="w-full py-2 px-3 rounded-lg text-xs font-extrabold transition ${
+              equipped ? 'bg-slate-800 hover:bg-slate-700 text-pink-300 cursor-pointer' : (owned || (isVipOnly && state.isVip)) ? 'bg-pink-600 hover:bg-pink-500 text-white active:scale-95 cursor-pointer' : isVipOnly ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white shadow active:scale-95 cursor-pointer' : canBuy ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow active:scale-95 cursor-pointer' : 'bg-slate-800/80 text-slate-500 cursor-not-allowed'
+            }">${equipped ? '응원 쉬기 (해제)' : (owned || (isVipOnly && state.isVip)) ? '함께 응원하기' : actionLabel}</button>
+          `;
+
+          card.querySelector('button').addEventListener('click', () => {
+            if (equipped) {
+              state.equippedPetId = null;
+              saveState(true);
+              showToast(`🐾 [${pet.name}]이(가) 잠시 휴식합니다.`);
+              updateUI();
+              return;
+            }
+
+            if (isVipOnly) {
+              if (!state.isVip) {
+                openVipModal();
+                return;
+              }
+              if (!state.ownedPets.includes(pet.id)) {
+                state.ownedPets.push(pet.id);
+              }
+            }
+
+            if (owned || (isVipOnly && state.isVip)) {
+              state.equippedPetId = pet.id;
+              anim.petCheerBoost = 1.0;
+              anim.petBubbleText = pet.cheers[0];
+              anim.petBubbleTimer = 2.0;
+              saveState(true);
+              playPurchaseSound();
+              showToast(`${pet.icon} [${pet.name}]이(가) 뒤에서 응원을 시작합니다!`);
+              updateUI();
+              return;
+            }
+
+            if (state.gold >= pet.cost) {
+              state.gold -= pet.cost;
+              state.ownedPets.push(pet.id);
+              state.equippedPetId = pet.id;
+              anim.petCheerBoost = 1.0;
+              anim.petBubbleText = pet.cheers[0];
+              anim.petBubbleTimer = 2.0;
+              saveState(true);
+              playPurchaseSound();
+              showToast(`🎉 [${pet.name}] 분양 완료! 용사님 뒤에서 열심히 응원합니다!`);
+              updateUI();
+            } else {
+              showToast(`골드가 부족합니다! (필요: ${formatNumber(pet.cost)} G)`);
+            }
+          });
+
+          panel.appendChild(card);
+        });
+      }
+
       function renderRegionsPanel() {
         const panel = document.getElementById('regionsPanel');
         panel.innerHTML = '';
@@ -2594,30 +3021,37 @@
       // ==========================================
       const tabWeaponsBtn = document.getElementById('tabWeaponsBtn');
       const tabRegionsBtn = document.getElementById('tabRegionsBtn');
+      const tabPetsBtn = document.getElementById('tabPetsBtn');
       const tabRankingBtn = document.getElementById('tabRankingBtn');
       const weaponsPanel = document.getElementById('weaponsPanel');
       const regionsPanel = document.getElementById('regionsPanel');
+      const petsPanel = document.getElementById('petsPanel');
       const rankingPanel = document.getElementById('rankingPanel');
 
       function switchMainTab(tabName) {
         activeTab = tabName;
-        const inactiveClass = 'flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition';
+        const inactiveClass = 'flex-1 sm:flex-initial px-3 py-2 rounded-lg text-xs font-extrabold text-slate-400 hover:text-slate-200 transition whitespace-nowrap cursor-pointer';
         tabWeaponsBtn.className = inactiveClass;
         tabRegionsBtn.className = inactiveClass;
+        tabPetsBtn.className = inactiveClass;
         tabRankingBtn.className = inactiveClass;
 
         weaponsPanel.classList.add('hidden'); weaponsPanel.classList.remove('grid');
         regionsPanel.classList.add('hidden'); regionsPanel.classList.remove('grid');
+        petsPanel.classList.add('hidden'); petsPanel.classList.remove('grid');
         rankingPanel.classList.add('hidden'); rankingPanel.classList.remove('flex');
 
         if (tabName === 'weapons') {
-          tabWeaponsBtn.className = 'flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs font-extrabold bg-slate-800 text-amber-300 shadow transition';
+          tabWeaponsBtn.className = 'flex-1 sm:flex-initial px-3 py-2 rounded-lg text-xs font-extrabold bg-slate-800 text-amber-300 shadow transition whitespace-nowrap cursor-pointer';
           weaponsPanel.classList.remove('hidden'); weaponsPanel.classList.add('grid');
         } else if (tabName === 'regions') {
-          tabRegionsBtn.className = 'flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs font-extrabold bg-slate-800 text-emerald-300 shadow transition';
+          tabRegionsBtn.className = 'flex-1 sm:flex-initial px-3 py-2 rounded-lg text-xs font-extrabold bg-slate-800 text-emerald-300 shadow transition whitespace-nowrap cursor-pointer';
           regionsPanel.classList.remove('hidden'); regionsPanel.classList.add('grid');
+        } else if (tabName === 'pets') {
+          tabPetsBtn.className = 'flex-1 sm:flex-initial px-3 py-2 rounded-lg text-xs font-extrabold bg-slate-800 text-pink-300 shadow transition whitespace-nowrap cursor-pointer';
+          petsPanel.classList.remove('hidden'); petsPanel.classList.add('grid');
         } else if (tabName === 'ranking') {
-          tabRankingBtn.className = 'flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs font-extrabold bg-slate-800 text-sky-300 shadow transition';
+          tabRankingBtn.className = 'flex-1 sm:flex-initial px-3 py-2 rounded-lg text-xs font-extrabold bg-slate-800 text-sky-300 shadow transition whitespace-nowrap cursor-pointer';
           rankingPanel.classList.remove('hidden'); rankingPanel.classList.add('flex');
           syncAndRefreshRanking(false);
         }
@@ -2625,6 +3059,7 @@
 
       tabWeaponsBtn.addEventListener('click', () => switchMainTab('weapons'));
       tabRegionsBtn.addEventListener('click', () => switchMainTab('regions'));
+      tabPetsBtn.addEventListener('click', () => switchMainTab('pets'));
       tabRankingBtn.addEventListener('click', () => switchMainTab('ranking'));
 
       document.getElementById('kingdomTickerBar').addEventListener('click', () => {
@@ -2780,6 +3215,9 @@
           if (!state.ownedWeapons.includes('light_sword')) {
             state.ownedWeapons.push('light_sword');
           }
+          if (!state.ownedPets.includes('gold_haetae')) {
+            state.ownedPets.push('gold_haetae');
+          }
         }
 
         const payload = isRegisterMode
@@ -2862,6 +3300,8 @@
         if (anim.monsterHit > 0) anim.monsterHit = Math.max(0, anim.monsterHit - dt * 4.5);
         if (anim.hitFlash > 0) anim.hitFlash = Math.max(0, anim.hitFlash - dt * 7.5);
         if (anim.screenShake > 0) anim.screenShake = Math.max(0, anim.screenShake - dt * 28);
+        if (anim.petCheerBoost > 0) anim.petCheerBoost = Math.max(0, anim.petCheerBoost - dt * 2.8);
+        if (anim.petBubbleTimer > 0) anim.petBubbleTimer = Math.max(0, anim.petBubbleTimer - dt);
 
         const comboBadge = document.getElementById('comboBadge');
         if (anim.comboTimer > 0) {
@@ -2889,6 +3329,8 @@
 
         drawEnvironment(region);
         drawMonster(canvasWidth * 0.72, groundY, region);
+        // 주인공 뒤쪽(0.14 위치)에서 응원하는 애완동물 렌더링
+        drawCheerPet(canvasWidth * 0.14, groundY);
         drawHero(canvasWidth * 0.30, groundY, weapon);
         updateAndDrawEffects(dt);
         ctx.restore();
