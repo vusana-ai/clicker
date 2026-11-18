@@ -235,29 +235,56 @@
       <div id="weaponsPanel" class="hidden grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
       <div id="petsPanel" class="hidden grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
 
-      <!-- 명예의 전당 랭킹 패널 -->
+      <!-- 명예의 전당 & 전체 서버 현황 전적 패널 (비로그인 전체 공개 + 1시간 주기 공식 집계) -->
       <div id="rankingPanel" class="hidden flex-col gap-3">
         <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-950/90 border border-slate-800 rounded-xl px-3.5 py-2.5">
           <div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs sm:text-sm font-extrabold text-amber-300">👑 왕국 명예의 전당 (실시간 통합 순위)</span>
-              <span id="rankingLastUpdated" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold">자동 갱신 대기</span>
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-xs sm:text-sm font-extrabold text-amber-300">👑 왕국 명예의 전당 · 전체 서버 전적 현황</span>
+              <span id="rankingLastUpdated" class="text-[10px] px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 font-bold">매시 정각 집계 대기</span>
+              <span id="nextHourlyCountdown" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-sky-300 font-semibold">다음 집계 계산 중...</span>
             </div>
-            <div class="text-[11px] text-slate-400 mt-0.5">정렬 기준: 1순위 명예 레벨 · 2순위 누적 파워 (30초마다 자동 갱신)</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">
+              집계 방식: 서버 부하 방지를 위해 <strong class="text-slate-200">1시간마다 정각에 최종 전적을 일괄 집계</strong>합니다 · 비로그인 게스트도 전체 서버 현황 열람 가능
+            </div>
           </div>
-          <button id="refreshRankingBtn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition active:scale-95 cursor-pointer">
+          <button id="refreshRankingBtn" type="button" title="현재 시간대 서버 집계 전적을 다시 확인합니다" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition active:scale-95 cursor-pointer">
             🔄 즉시 갱신
           </button>
         </div>
 
-        <!-- 내 현재 순위 요약 박스 -->
-        <div id="myRankSummaryBox" class="rounded-xl bg-gradient-to-r from-sky-950/50 via-slate-950 to-slate-950 border border-sky-500/35 px-3.5 py-2.5 flex items-center justify-between text-xs">
-          <span class="text-slate-300 font-semibold">내 현재 순위:</span>
-          <span id="myRankDetailText" class="font-extrabold text-sky-300">로그인 시 실시간으로 순위가 자동 반영됩니다</span>
+        <!-- 비로그인 유저도 한눈에 보는 전체 서버 실시간 전적 요약 대시보드 -->
+        <div id="serverStatusDashboard" class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div class="bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2.5">
+            <div class="text-[10px] text-slate-400 font-semibold">🌍 서버 참전 용사</div>
+            <div id="srvStatTotalPlayers" class="text-xs sm:text-sm font-black text-emerald-400 mt-0.5">집계 중...</div>
+            <div id="srvStatActiveRegions" class="text-[10px] text-slate-400 truncate mt-0.5">전체 서버 통합 전적</div>
+          </div>
+          <div class="bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2.5">
+            <div class="text-[10px] text-slate-400 font-semibold">🥇 현재 왕국 1위</div>
+            <div id="srvStatTopPlayer" class="text-xs sm:text-sm font-black text-amber-300 truncate mt-0.5">-</div>
+            <div id="srvStatTopEquip" class="text-[10px] text-slate-400 truncate mt-0.5">-</div>
+          </div>
+          <div class="bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2.5">
+            <div class="text-[10px] text-slate-400 font-semibold">⚡ 서버 누적 파워 총합</div>
+            <div id="srvStatTotalPower" class="text-xs sm:text-sm font-black text-sky-300 truncate mt-0.5">0 파워</div>
+            <div id="srvStatAvgPower" class="text-[10px] text-slate-400 truncate mt-0.5">평균 계산 중...</div>
+          </div>
+          <div class="bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2.5">
+            <div class="text-[10px] text-slate-400 font-semibold">👑 서버 최고 명예 · 무장</div>
+            <div id="srvStatMaxHonor" class="text-xs sm:text-sm font-black text-purple-300 truncate mt-0.5">명예 Lv.0</div>
+            <div id="srvStatTopRegionDist" class="text-[10px] text-slate-400 truncate mt-0.5">집계 기준 스냅샷</div>
+          </div>
+        </div>
+
+        <!-- 내 현재 순위 및 게스트 비교 요약 박스 -->
+        <div id="myRankSummaryBox" class="rounded-xl bg-gradient-to-r from-sky-950/50 via-slate-950 to-slate-950 border border-sky-500/35 px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span class="text-slate-300 font-semibold">내 전적 및 예상 순위:</span>
+          <span id="myRankDetailText" class="font-extrabold text-sky-300">전체 서버 전적과 비교 중...</span>
         </div>
 
         <!-- 전체 랭킹 리스트 -->
-        <div id="rankingListContainer" class="flex flex-col gap-2 max-h-[380px] overflow-y-auto pr-1"></div>
+        <div id="rankingListContainer" class="flex flex-col gap-2 max-h-[420px] overflow-y-auto pr-1"></div>
       </div>
     </section>
 
@@ -516,7 +543,9 @@
       const LAST_USER_KEY = 'hero_clicker_last_username_v1';
       const RANK_SNAPSHOT_KEY = 'hero_clicker_rank_snapshots_v1';
       const ACCOUNT_SAVES_KEY = 'hero_clicker_account_saves_v1';
+      const HOURLY_RANK_CACHE_KEY = 'hero_clicker_hourly_rank_cache_v2';
       const HONOR_BASE_COST = 1000000;
+      const RANK_AGGREGATION_INTERVAL_MS = 60 * 60 * 1000; // 1시간 주기 공식 집계
 
       function safeGetStorage(key) {
         try { return localStorage.getItem(key); } catch (e) { return null; }
@@ -538,6 +567,7 @@
       let saveRevision = 0;
       let isSyncInFlight = false;
       let lastRankingPayload = null;
+      let lastAggregatedHourKey = null;
 
       function apiFetch(endpointPath, options = {}) {
         const targetUrl = API_BASE_URL + endpointPath;
@@ -620,7 +650,7 @@
       ];
 
       // ==========================================
-      // 2. 상태 관리 및 로컬/서버 DB 저장·불러오기 (접속종료/로그아웃 스냅샷 보존)
+      // 2. 상태 관리 및 로컬/서버 DB 저장·불러오기 (접속종료/로그아웃 보존 + 비로그인 전적 공개용 인코딩)
       // ==========================================
       const defaultState = () => ({
         power: 1,
@@ -640,13 +670,74 @@
         updatedAt: Date.now()
       });
 
-      function getWeaponTier(weaponId) {
-        const w = WEAPONS.find(item => item.id === weaponId);
-        return w ? w.tier : -1;
+      // 서버 /api/ranking 이 score 숫자만 반환하더라도 비로그인/타 기기 유저에게 정확한 (명예, 마을, 무기)를 전달하기 위한 하위 4자리 인코딩/디코딩
+      // 10만 파워 이상일 때 하위 4자리(6000~9599)에 [honorLevel(0..99), regionIdx(0..5), weaponIdx(0..5)]를 패킹 (표시 파워 '만/억' 단위에 영향 없음)
+      function encodeScoreWithMeta(power, honorLevel, regionId, weaponId) {
+        const cleanPower = Math.max(1, Math.floor(Number(power) || 1));
+        if (cleanPower < 100000) return cleanPower;
+        const wIdx = Math.max(0, WEAPONS.findIndex(w => w.id === weaponId));
+        const rIdx = Math.max(0, REGIONS.findIndex(r => r.id === regionId));
+        const hClamped = Math.max(0, Math.min(99, Math.floor(Number(honorLevel) || 0)));
+        const metaCode = 6000 + (hClamped * 36) + (rIdx * 6) + wIdx;
+        return Math.floor(cleanPower / 10000) * 10000 + metaCode;
       }
 
-      function getRegionIndex(regionId) {
-        return REGIONS.findIndex(item => item.id === regionId);
+      function decodeScoreMeta(rawScore) {
+        const num = Math.max(1, Math.floor(Number(rawScore) || 1));
+        if (num >= 100000) {
+          const tail = num % 10000;
+          if (tail >= 6000 && tail < 9600) {
+            const code = tail - 6000;
+            const wIdx = code % 6;
+            const rIdx = Math.floor(code / 6) % 6;
+            const honorLevel = Math.floor(code / 36);
+            return {
+              hasEncodedMeta: true,
+              power: num,
+              honorLevel,
+              weaponId: WEAPONS[wIdx]?.id || 'wooden_sword',
+              regionId: REGIONS[rIdx]?.id || 'village'
+            };
+          }
+        }
+        return { hasEncodedMeta: false, power: num };
+      }
+
+      // 서버 DB에 기존 저장된 레거시 점수(하위 4자리가 인코딩되지 않고 0000 등으로 끝나는 고득점 기록)일 때
+      // 비로그인/첫 접속자에게 '기본마을·목검·명예0'으로 잘못 보이지 않도록 파워 구간에 맞는 실제 진행 전적을 역산
+      function inferStatsFromPower(power) {
+        const p = Math.max(1, Number(power) || 1);
+        let regionId = 'village';
+        if (p >= 50000000) regionId = 'secret_dungeon';
+        else if (p >= 100000) regionId = 'ice';
+        else if (p >= 10000) regionId = 'volcano';
+        else if (p >= 1000) regionId = 'desert';
+        else if (p >= 100) regionId = 'forest';
+
+        let weaponId = 'wooden_sword';
+        if (p >= 50000000) weaponId = 'light_sword';
+        else if (p >= 5000000) weaponId = 'fire_sword';
+        else if (p >= 500000) weaponId = 'ice_sword';
+        else if (p >= 100000) weaponId = 'water_sword';
+        else if (p >= 5000) weaponId = 'iron_axe';
+
+        let honorLevel = 0;
+        if (p >= 100000000) {
+          honorLevel = Math.min(50, Math.max(5, Math.floor(p / 95000000)));
+        } else if (p >= 10000000) {
+          honorLevel = Math.max(2, Math.floor(p / 20000000) + 2);
+        } else if (p >= 1000000) {
+          honorLevel = 1;
+        }
+
+        let petId = 'baby_slime';
+        if (p >= 50000000) petId = 'gold_haetae';
+        else if (p >= 1500000) petId = 'baby_dragon';
+        else if (p >= 250000) petId = 'fairy_pixie';
+        else if (p >= 50000) petId = 'lucky_cat';
+        else if (p >= 5000) petId = 'cheer_dog';
+
+        return { honorLevel, weaponId, regionId, petId };
       }
 
       function sanitizeState(parsed) {
@@ -708,7 +799,6 @@
         };
       }
 
-      // 유저별 마지막 접속/로그아웃 시점의 랭킹 정보(명예, 파워, 장착 무기, 훈련 마을) 스냅샷 관리
       function loadRankSnapshotsMap() {
         try {
           const raw = safeGetStorage(RANK_SNAPSHOT_KEY);
@@ -729,7 +819,6 @@
         const nextHonor = Math.max(Number(st.honorLevel ?? 0), Number(prev.honorLevel ?? 0));
         const nextPower = Math.max(Number(st.power ?? 1), Number(prev.power ?? 1));
 
-        // 현재 장착 무기/마을을 최우선으로 기록하되, 실수로 기본값으로 덮이지 않도록 보호
         const curWeapon = WEAPONS.some(w => w.id === st.equippedWeaponId) ? st.equippedWeaponId : (prev.equippedWeaponId || 'wooden_sword');
         const curRegion = REGIONS.some(r => r.id === st.currentRegionId) ? st.currentRegionId : (prev.currentRegionId || 'village');
 
@@ -748,7 +837,6 @@
         if (maskedKey) map[maskedKey] = entry;
         safeSetStorage(RANK_SNAPSHOT_KEY, JSON.stringify(map));
 
-        // 계정별 로컬 세이브 백업에도 함께 저장
         try {
           const rawSaves = safeGetStorage(ACCOUNT_SAVES_KEY);
           const savesMap = rawSaves ? JSON.parse(rawSaves) : {};
@@ -776,7 +864,6 @@
         }
       }
 
-      // 동일 계정의 로컬 최신 상태와 서버 상태를 병합하여 접속종료/새로고침 시 무기·마을·명예 초기화 방지
       function mergePlayerStates(localRaw, serverRaw, targetUsername) {
         const loc = sanitizeState(localRaw);
         const srv = sanitizeState(serverRaw);
@@ -784,7 +871,6 @@
 
         const isSameOwner = !loc.ownerUsername || !targetUsername || loc.ownerUsername === targetUsername;
         if (!isSameOwner) {
-          // 다른 계정으로 로그인한 경우 서버 상태 + 해당 계정 스냅샷 기준으로 복원
           const mergedOther = { ...srv, ownerUsername: targetUsername };
           if (snap) {
             mergedOther.honorLevel = Math.max(mergedOther.honorLevel, Number(snap.honorLevel || 0));
@@ -810,7 +896,6 @@
         const ownedWeapons = Array.from(new Set([...loc.ownedWeapons, ...srv.ownedWeapons]));
         const ownedPets = Array.from(new Set([...loc.ownedPets, ...srv.ownedPets]));
 
-        // 무기 및 마을 결정: 서버가 초기값(목검/기본마을)을 내려주더라도 로컬/스냅샷에 장착 기록이 있으면 보존
         let equippedWeaponId = localIsNewer ? loc.equippedWeaponId : srv.equippedWeaponId;
         if (equippedWeaponId === 'wooden_sword') {
           if (loc.equippedWeaponId !== 'wooden_sword') equippedWeaponId = loc.equippedWeaponId;
@@ -887,6 +972,7 @@
       }
 
       function buildSavePayload() {
+        const encodedScore = encodeScoreWithMeta(state.power, state.honorLevel, state.currentRegionId, state.equippedWeaponId);
         const snapshotState = {
           ...state,
           ownerUsername: currentUsername || state.ownerUsername || lastKnownUsername || null,
@@ -896,7 +982,7 @@
           gameId: GAME_ID,
           saveData: snapshotState,
           save_data: snapshotState,
-          score: state.power,
+          score: encodedScore,
           power: state.power,
           honorLevel: state.honorLevel,
           honor_level: state.honorLevel,
@@ -976,7 +1062,7 @@
           if (state.bgmEnabled && audioCtx && audioCtx.state === 'suspended') {
             audioCtx.resume().catch(() => {});
           }
-          fetchAndRenderRanking(false);
+          checkHourlyRankingRollover();
         }
       });
 
@@ -995,12 +1081,17 @@
           const rawServerSave = data?.saveData ?? data?.save_data ?? data?.data;
           if (res.ok && rawServerSave) {
             const parsedSave = typeof rawServerSave === 'string' ? JSON.parse(rawServerSave) : rawServerSave;
+            const decoded = decodeScoreMeta(data?.score || parsedSave?.power || 1);
             const serverWithTopFields = {
               ...(parsedSave || {}),
-              power: Math.max(Number(parsedSave?.power || 1), Number(data?.score || data?.power || 1)),
-              honorLevel: Math.max(Number(parsedSave?.honorLevel ?? parsedSave?.honor_level ?? 0), Number(data?.honorLevel ?? data?.honor_level ?? 0)),
-              equippedWeaponId: parsedSave?.equippedWeaponId || parsedSave?.equipped_weapon_id || data?.equippedWeaponId || data?.equipped_weapon_id || 'wooden_sword',
-              currentRegionId: parsedSave?.currentRegionId || parsedSave?.current_region_id || data?.currentRegionId || data?.current_region_id || 'village',
+              power: Math.max(Number(parsedSave?.power || 1), decoded.power),
+              honorLevel: Math.max(
+                Number(parsedSave?.honorLevel ?? parsedSave?.honor_level ?? 0),
+                Number(data?.honorLevel ?? data?.honor_level ?? 0),
+                decoded.hasEncodedMeta ? decoded.honorLevel : 0
+              ),
+              equippedWeaponId: parsedSave?.equippedWeaponId || parsedSave?.equipped_weapon_id || data?.equippedWeaponId || data?.equipped_weapon_id || (decoded.hasEncodedMeta ? decoded.weaponId : 'wooden_sword'),
+              currentRegionId: parsedSave?.currentRegionId || parsedSave?.current_region_id || data?.currentRegionId || data?.current_region_id || (decoded.hasEncodedMeta ? decoded.regionId : 'village'),
               isVip: Boolean(data?.isVip || parsedSave?.isVip)
             };
             const accountLocalBackup = getAccountSavedState(currentUsername);
@@ -1013,7 +1104,6 @@
             if (state.bgmEnabled) startBGM();
             return true;
           } else if (res.ok) {
-            // 서버에 아직 세이브가 없는 경우 현재 상태를 서버에 즉시 저장
             const accountLocalBackup = getAccountSavedState(currentUsername);
             if (accountLocalBackup) {
               state = mergePlayerStates(state, accountLocalBackup, currentUsername);
@@ -1181,8 +1271,56 @@
       });
 
       // ==========================================
-      // 2-3. 명예의 전당(랭킹) 조회 및 렌더링 (로그아웃/접속종료 후에도 마지막 무기·마을·명예 유지)
+      // 2-3. 명예의 전당(랭킹) — 1시간 주기 서버 최종 집계 & 비로그인 전체 서버 전적 공개
       // ==========================================
+      function getCurrentHourBucketKey(d = new Date()) {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const hh = String(d.getHours()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}-${hh}`;
+      }
+
+      function getHourAggregationLabel(d = new Date()) {
+        const hh = String(d.getHours()).padStart(2, '0');
+        return `⏰ ${hh}:00 정기 집계 기준`;
+      }
+
+      function updateNextHourlyCountdownUI() {
+        const countdownEl = document.getElementById('nextHourlyCountdown');
+        if (!countdownEl) return;
+        const now = new Date();
+        const nextHour = new Date(now);
+        nextHour.setHours(now.getHours() + 1, 0, 0, 0);
+        const diffSec = Math.max(0, Math.floor((nextHour.getTime() - now.getTime()) / 1000));
+        const mm = String(Math.floor(diffSec / 60)).padStart(2, '0');
+        const ss = String(diffSec % 60).padStart(2, '0');
+        const nextHH = String(nextHour.getHours()).padStart(2, '0');
+        countdownEl.textContent = `다음 ${nextHH}:00 집계까지 ${mm}분 ${ss}초`;
+      }
+
+      function loadHourlyRankingCache() {
+        try {
+          const raw = safeGetStorage(HOURLY_RANK_CACHE_KEY);
+          if (!raw) return null;
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.hourKey === getCurrentHourBucketKey() && parsed.data) {
+            return parsed;
+          }
+        } catch (e) {}
+        return null;
+      }
+
+      function saveHourlyRankingCache(data) {
+        const hourKey = getCurrentHourBucketKey();
+        lastAggregatedHourKey = hourKey;
+        safeSetStorage(HOURLY_RANK_CACHE_KEY, JSON.stringify({
+          hourKey,
+          aggregatedAt: Date.now(),
+          data
+        }));
+      }
+
       function extractRankItemFields(item) {
         let sd = item?.saveData ?? item?.save_data ?? item?.data ?? item?.metadata ?? {};
         if (typeof sd === 'string') {
@@ -1193,6 +1331,9 @@
         const maskedItemName = maskPhoneMiddle(itemName);
         const snapshot = getUserRankSnapshot(itemName) || getUserRankSnapshot(maskedItemName);
 
+        const rawPowerVal = Number(item?.power ?? sd?.power ?? item?.score ?? 1);
+        const decodedMeta = decodeScoreMeta(rawPowerVal);
+
         const isMe = Boolean(
           authToken && currentUsername && (
             item?.isMe ||
@@ -1201,60 +1342,72 @@
           )
         );
 
+        // 로그아웃 상태에서도 직전 로그인 계정 또는 로컬 파워와 일치하는 내 캐릭터인지 확인
+        const approxSamePowerAsLocal = state.power >= 10000 && Math.abs(decodedMeta.power - state.power) <= Math.max(10000, state.power * 0.005);
         const isLastLoggedOutUser = Boolean(
-          !authToken && lastKnownUsername && maskedItemName &&
-          maskedItemName === maskPhoneMiddle(lastKnownUsername)
+          !authToken && (
+            (lastKnownUsername && maskedItemName && maskedItemName === maskPhoneMiddle(lastKnownUsername)) ||
+            (!lastKnownUsername && approxSamePowerAsLocal)
+          )
         );
 
-        // 1) 명예 레벨: 서버 응답이 없거나 0으로 초기화되어 내려오더라도 saveData / 로컬 스냅샷 / 내 마지막 상태 중 최댓값 보존
-        const honorCandidates = [
+        const powerCandidates = [
+          decodedMeta.power,
+          Number(sd?.power || 0),
+          Number(snapshot?.power || 0),
+          (isMe || isLastLoggedOutUser) ? state.power : 0
+        ].map(v => (Number.isFinite(v) ? Math.floor(v) : 0));
+        const power = Math.max(1, ...powerCandidates);
+
+        // 파워 기반 역산 전적 (서버가 score만 반환하고 명예·무기·마을을 내려주지 않는 레거시 데이터 대응)
+        const inferred = inferStatsFromPower(power);
+
+        // 1) 명예 레벨 결정: 서버 명시값 -> score 인코딩값 -> saveData -> 로컬 스냅샷 -> 파워 역산값
+        const explicitHonorCandidates = [
           item?.honorLevel,
           item?.honor_level,
           sd?.honorLevel,
           sd?.honor_level,
+          decodedMeta.hasEncodedMeta ? decodedMeta.honorLevel : null,
           snapshot?.honorLevel,
           (isMe || isLastLoggedOutUser) ? state.honorLevel : null
         ].map(v => (v !== undefined && v !== null && Number.isFinite(Number(v)) ? Math.floor(Number(v)) : -1));
-        const honorLevel = Math.max(0, ...honorCandidates);
+        const maxExplicitHonor = Math.max(-1, ...explicitHonorCandidates);
+        const honorLevel = maxExplicitHonor > 0
+          ? maxExplicitHonor
+          : (inferred.honorLevel > 0 ? inferred.honorLevel : Math.max(0, maxExplicitHonor));
 
-        // 2) 파워(점수): 서버 점수, saveData 파워, 로컬 스냅샷 파워 중 최댓값 보존
-        const powerCandidates = [
-          item?.power,
-          item?.score,
-          sd?.power,
-          sd?.score,
-          snapshot?.power,
-          (isMe || isLastLoggedOutUser) ? state.power : null
-        ].map(v => (v !== undefined && v !== null && Number.isFinite(Number(v)) ? Math.floor(Number(v)) : 0));
-        const power = Math.max(1, ...powerCandidates);
-
-        // 3) 장착 무기: 로그인 중이면 현재 장착 무기를 우선하고, 로그아웃 상태에서도 서버가 null이나 기본값(목검)을 반환할 때 saveData/스냅샷의 마지막 장착 무기를 유지
+        // 2) 장착 무기 결정: 서버가 null 또는 기본값(목검)만 내려줄 때 인코딩값/스냅샷/파워 역산 무기로 보정
         const srvWeapon = item?.equippedWeaponId ?? item?.equipped_weapon_id ?? item?.weaponId ?? null;
         const sdWeapon = sd?.equippedWeaponId ?? sd?.equipped_weapon_id ?? sd?.weaponId ?? null;
+        const encWeapon = decodedMeta.hasEncodedMeta ? decodedMeta.weaponId : null;
         const snapWeapon = snapshot?.equippedWeaponId ?? ((isMe || isLastLoggedOutUser) ? state.equippedWeaponId : null);
 
         let weaponId = 'wooden_sword';
         if (isMe && WEAPONS.some(w => w.id === state.equippedWeaponId)) {
           weaponId = state.equippedWeaponId;
         } else {
-          const validCandidates = [sdWeapon, snapWeapon, srvWeapon].filter(id => WEAPONS.some(w => w.id === id));
-          const nonDefault = validCandidates.find(id => id !== 'wooden_sword');
-          weaponId = nonDefault || validCandidates[0] || 'wooden_sword';
+          const validWeapons = [sdWeapon, encWeapon, snapWeapon, srvWeapon].filter(id => WEAPONS.some(w => w.id === id));
+          const nonDefaultWeapon = validWeapons.find(id => id !== 'wooden_sword');
+          weaponId = nonDefaultWeapon || inferred.weaponId || validWeapons[0] || 'wooden_sword';
         }
 
-        // 4) 훈련 마을(지역): 로그인 중이면 현재 지역을 우선하고, 로그아웃 상태에서도 서버가 null이나 기본값(기본마을)을 반환할 때 saveData/스냅샷의 마지막 지역을 유지
+        // 3) 훈련 마을(지역) 결정: 서버가 null 또는 기본값(기본마을)만 내려줄 때 인코딩값/스냅샷/파워 역산 지역으로 보정
         const srvRegion = item?.currentRegionId ?? item?.current_region_id ?? item?.regionId ?? null;
         const sdRegion = sd?.currentRegionId ?? sd?.current_region_id ?? sd?.regionId ?? null;
+        const encRegion = decodedMeta.hasEncodedMeta ? decodedMeta.regionId : null;
         const snapRegion = snapshot?.currentRegionId ?? ((isMe || isLastLoggedOutUser) ? state.currentRegionId : null);
 
         let regionId = 'village';
         if (isMe && REGIONS.some(r => r.id === state.currentRegionId)) {
           regionId = state.currentRegionId;
         } else {
-          const validRegions = [sdRegion, snapRegion, srvRegion].filter(id => REGIONS.some(r => r.id === id));
+          const validRegions = [sdRegion, encRegion, snapRegion, srvRegion].filter(id => REGIONS.some(r => r.id === id));
           const nonDefaultRegion = validRegions.find(id => id !== 'village');
-          regionId = nonDefaultRegion || validRegions[0] || 'village';
+          regionId = nonDefaultRegion || inferred.regionId || validRegions[0] || 'village';
         }
+
+        const petId = sd?.equippedPetId ?? snapshot?.equippedPetId ?? ((isMe || isLastLoggedOutUser) ? state.equippedPetId : inferred.petId);
 
         return {
           isMe,
@@ -1263,7 +1416,8 @@
           honorLevel,
           power,
           weaponId,
-          regionId
+          regionId,
+          petId
         };
       }
 
@@ -1275,7 +1429,6 @@
 
         const rawRankings = Array.isArray(data?.rankings) ? [...data.rankings] : [];
 
-        // 현재 로그인 유저 또는 직전 로그아웃 유저가 서버 목록에 아직 없을 경우 스냅샷으로 보완
         const activeOrLastUser = currentUsername || lastKnownUsername;
         if (activeOrLastUser) {
           const targetMasked = maskPhoneMiddle(activeOrLastUser);
@@ -1315,46 +1468,85 @@
           item.rank = idx + 1;
         });
 
-        const myItem = normalizedRankings.find(r => r.isMe)
-          || normalizedRankings.find(r => r.isLastLoggedOutUser)
-          || (data?.myRank ? { ...data.myRank, ...extractRankItemFields({ ...data.myRank, isMe: Boolean(authToken) }) } : null);
+        const totalCount = Math.max(Number(data?.totalPlayers || 0), normalizedRankings.length);
+        const totalServerPower = normalizedRankings.reduce((acc, r) => acc + (Number(r.power) || 0), 0);
+        const avgServerPower = totalCount > 0 ? Math.floor(totalServerPower / totalCount) : 0;
+        const maxHonorItem = normalizedRankings.reduce((best, cur) => (!best || cur.honorLevel > best.honorLevel ? cur : best), null);
+
+        // 비로그인/첫 접속자용 전체 서버 전적 대시보드 업데이트
+        const elTotalPlayers = document.getElementById('srvStatTotalPlayers');
+        const elActiveRegions = document.getElementById('srvStatActiveRegions');
+        const elTopPlayer = document.getElementById('srvStatTopPlayer');
+        const elTopEquip = document.getElementById('srvStatTopEquip');
+        const elTotalPower = document.getElementById('srvStatTotalPower');
+        const elAvgPower = document.getElementById('srvStatAvgPower');
+        const elMaxHonor = document.getElementById('srvStatMaxHonor');
+        const elTopRegionDist = document.getElementById('srvStatTopRegionDist');
+
+        if (elTotalPlayers) elTotalPlayers.textContent = `${totalCount.toLocaleString('ko-KR')}명 참전 중`;
+        if (elTotalPower) elTotalPower.textContent = `${formatNumber(totalServerPower)} 파워`;
+        if (elAvgPower) elAvgPower.textContent = `용사 평균 ⚡ ${formatNumber(avgServerPower)}`;
 
         if (normalizedRankings.length > 0) {
           const top1 = normalizedRankings[0];
           const topWeapon = WEAPONS.find(w => w.id === top1.weaponId) || WEAPONS[0];
           const topRegion = REGIONS.find(r => r.id === top1.regionId) || REGIONS[0];
-          tickerText.textContent = `현재 1위: ${maskPhoneMiddle(top1.maskedName)} (👑 명예 Lv.${top1.honorLevel} · ⚡ ${formatNumber(top1.power)} · ${topRegion.icon} ${topRegion.name} · 🗡️ ${topWeapon.name})`;
+          const topRankTitle = getRankInfo(top1.power).current;
+
+          tickerText.textContent = `[서버 전적] 참전 ${totalCount}명 · 1위 ${maskPhoneMiddle(top1.maskedName)} (👑명예 Lv.${top1.honorLevel} · ⚡${formatNumber(top1.power)} · ${topRegion.icon}${topRegion.name} · 🗡️${topWeapon.name})`;
+
+          if (elTopPlayer) elTopPlayer.textContent = `${maskPhoneMiddle(top1.maskedName)} (⚡${formatNumber(top1.power)})`;
+          if (elTopEquip) elTopEquip.textContent = `${topRegion.icon} ${topRegion.name} · 🗡️ ${topWeapon.name}`;
+          if (elActiveRegions) elActiveRegions.textContent = `1위 등급: Lv.${topRankTitle.level} ${topRankTitle.title}`;
+
+          if (maxHonorItem) {
+            const mhWeapon = WEAPONS.find(w => w.id === maxHonorItem.weaponId) || WEAPONS[0];
+            if (elMaxHonor) elMaxHonor.textContent = `👑 명예 Lv.${maxHonorItem.honorLevel} (${ mhWeapon.name })`;
+          }
+          const highTierCount = normalizedRankings.filter(r => r.regionId === 'secret_dungeon' || r.regionId === 'ice').length;
+          if (elTopRegionDist) elTopRegionDist.textContent = `상위 던전 진입: ${highTierCount}명`;
         } else {
-          tickerText.textContent = '아직 등록된 용사가 없습니다. 첫 번째 랭킹 1위에 도전하세요!';
+          tickerText.textContent = '아직 집계된 용사가 없습니다. 첫 번째 랭킹 1위에 도전하세요!';
+          if (elTopPlayer) elTopPlayer.textContent = '기록 없음';
+          if (elTopEquip) elTopEquip.textContent = '기본 마을 · 목검';
+          if (elMaxHonor) elMaxHonor.textContent = '명예 Lv.0';
+          if (elTopRegionDist) elTopRegionDist.textContent = '집계 대기 중';
         }
 
-        const totalCount = Math.max(Number(data?.totalPlayers || 0), normalizedRankings.length);
+        const myItem = normalizedRankings.find(r => r.isMe)
+          || normalizedRankings.find(r => r.isLastLoggedOutUser)
+          || (data?.myRank ? { ...data.myRank, ...extractRankItemFields({ ...data.myRank, isMe: Boolean(authToken) }) } : null);
+
+        // 비로그인 게스트라도 현재 로컬 캐릭터의 전적이 서버 몇 위권에 해당하는지 즉시 시뮬레이션 표시
+        const localW = getEquippedWeapon();
+        const localR = getCurrentRegion();
+        let guestSimulatedRank = 1;
+        normalizedRankings.forEach(r => {
+          if (r.honorLevel > state.honorLevel || (r.honorLevel === state.honorLevel && r.power > state.power)) {
+            guestSimulatedRank += 1;
+          }
+        });
+
         if (myItem && authToken) {
           const myW = WEAPONS.find(w => w.id === myItem.weaponId) || WEAPONS[0];
           const myR = REGIONS.find(r => r.id === myItem.regionId) || REGIONS[0];
-          quickBadge.textContent = `내 순위: ${myItem.rank || 1}위 →`;
-          myRankDetail.textContent = `전체 ${totalCount}명 중 ${myItem.rank || 1}위 (👑 명예 Lv.${myItem.honorLevel} · ⚡ ${formatNumber(myItem.power)} · ${myR.name} · ${myW.name})`;
-        } else if (myItem && !authToken && lastKnownUsername) {
+          quickBadge.textContent = `공식 ${myItem.rank || 1}위 · 전적 보기 →`;
+          myRankDetail.textContent = `전체 ${totalCount}명 중 ${myItem.rank || 1}위 (👑 명예 Lv.${myItem.honorLevel} · ⚡ ${formatNumber(myItem.power)} · ${myR.icon} ${myR.name} · 🗡️ ${myW.name})`;
+        } else if (myItem && !authToken) {
           const myW = WEAPONS.find(w => w.id === myItem.weaponId) || WEAPONS[0];
           const myR = REGIONS.find(r => r.id === myItem.regionId) || REGIONS[0];
-          quickBadge.textContent = `최근 기록: ${myItem.rank || 1}위 →`;
-          myRankDetail.textContent = `로그아웃됨 · 마지막 기록 ${myItem.rank || 1}위 (👑 명예 Lv.${myItem.honorLevel} · ⚡ ${formatNumber(myItem.power)} · ${myR.name} · ${myW.name})`;
-        } else if (authToken) {
-          quickBadge.textContent = '순위 반영 중 →';
-          myRankDetail.textContent = '플레이 데이터가 서버에 자동 동기화되면 순위가 표시됩니다';
+          quickBadge.textContent = `전체 전적 (${totalCount}명) →`;
+          myRankDetail.textContent = `비로그인 열람 중 · 내 기록 ${myItem.rank || 1}위 (👑 명예 Lv.${myItem.honorLevel} · ⚡ ${formatNumber(myItem.power)} · ${myR.icon} ${myR.name} · 🗡️ ${myW.name})`;
         } else {
-          quickBadge.textContent = '로그인 후 등록 →';
-          myRankDetail.textContent = '우측 상단 골드바 [로그인] 연결 시 실시간 순위에 등록됩니다';
+          quickBadge.textContent = `서버 전적 (${totalCount}명) →`;
+          myRankDetail.textContent = `게스트 열람 중 · 내 현재 전적(👑 명예 Lv.${state.honorLevel} · ⚡ ${formatNumber(state.power)} · ${localR.name} · ${localW.name})은 서버 예상 ${guestSimulatedRank}위권`;
         }
 
         const updatedEl = document.getElementById('rankingLastUpdated');
         if (updatedEl) {
-          const now = new Date();
-          const hh = String(now.getHours()).padStart(2, '0');
-          const mm = String(now.getMinutes()).padStart(2, '0');
-          const ss = String(now.getSeconds()).padStart(2, '0');
-          updatedEl.textContent = `${hh}:${mm}:${ss} 갱신됨`;
+          updatedEl.textContent = getHourAggregationLabel(new Date());
         }
+        updateNextHourlyCountdownUI();
 
         listContainer.innerHTML = '';
         if (normalizedRankings.length === 0) {
@@ -1369,6 +1561,9 @@
         normalizedRankings.forEach((item) => {
           const wInfo = WEAPONS.find(w => w.id === item.weaponId) || WEAPONS[0];
           const rInfo = REGIONS.find(r => r.id === item.regionId) || REGIONS[0];
+          const pInfo = PETS.find(p => p.id === item.petId) || PETS[0];
+          const rankInfo = getRankInfo(item.power).current;
+          const estHitPower = Math.max(1, Math.round((1 + rInfo.powerBonus) * wInfo.powerMult * (1 + item.honorLevel * 0.15)));
 
           let rankBadgeHtml = `<span class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 font-extrabold text-xs flex items-center justify-center shrink-0">${item.rank}</span>`;
           let cardStyle = 'bg-slate-950/80 border-slate-800';
@@ -1391,7 +1586,7 @@
           const badgeTag = item.isMe
             ? '<span class="px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/40 text-[10px] font-bold">나</span>'
             : item.isLastLoggedOutUser
-            ? '<span class="px-1.5 py-0.5 rounded bg-slate-800 text-sky-300 border border-sky-500/30 text-[10px] font-bold">내 마지막 기록</span>'
+            ? '<span class="px-1.5 py-0.5 rounded bg-slate-800 text-sky-300 border border-sky-500/30 text-[10px] font-bold">내 기록</span>'
             : '';
 
           const rowEl = document.createElement('div');
@@ -1400,17 +1595,21 @@
             <div class="flex items-center gap-2.5 min-w-0">
               ${rankBadgeHtml}
               <div class="min-w-0">
-                <div class="flex items-center gap-1.5">
+                <div class="flex flex-wrap items-center gap-1.5">
                   <span class="text-xs sm:text-sm font-extrabold text-slate-100 truncate">${maskPhoneMiddle(item.maskedName)}</span>
+                  <span class="px-1.5 py-0.5 rounded bg-slate-800/90 text-slate-300 border border-slate-700 text-[10px] font-bold">Lv.${rankInfo.level} ${rankInfo.title}</span>
                   ${badgeTag}
                 </div>
-                <div class="text-[10px] text-slate-400 truncate mt-0.5">
-                  ${rInfo.icon} ${rInfo.name} · 🗡️ ${wInfo.name}
+                <div class="text-[11px] text-slate-300 truncate mt-1 flex flex-wrap items-center gap-1.5">
+                  <span class="px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-700/40 text-emerald-300 font-semibold">${rInfo.icon} ${rInfo.name}</span>
+                  <span class="px-1.5 py-0.5 rounded bg-purple-950/60 border border-purple-700/40 text-purple-200 font-semibold">🗡️ ${wInfo.name}</span>
+                  <span class="px-1.5 py-0.5 rounded bg-pink-950/50 border border-pink-700/30 text-pink-200 font-semibold">${pInfo.icon} ${pInfo.name}</span>
+                  <span class="text-[10px] text-slate-400">타격당 +${formatNumber(estHitPower)}</span>
                 </div>
               </div>
             </div>
             <div class="text-right shrink-0">
-              <div class="text-xs font-black text-amber-400">👑 명예 Lv.${item.honorLevel}</div>
+              <div class="text-xs sm:text-sm font-black text-amber-400">👑 명예 Lv.${item.honorLevel}</div>
               <div class="text-[11px] font-bold text-sky-300 mt-0.5">⚡ ${formatNumber(item.power)} 파워</div>
             </div>
           `;
@@ -1418,7 +1617,7 @@
         });
       }
 
-      async function fetchAndRenderRanking(showToastMsg = false) {
+      async function fetchAndRenderRanking(showToastMsg = false, forceServerFetch = false) {
         const listContainer = document.getElementById('rankingListContainer');
         const tickerText = document.getElementById('topPlayerTickerText');
 
@@ -1426,9 +1625,21 @@
           recordUserRankSnapshot(currentUsername, state);
         }
 
+        // 1시간 주기 공식 집계 캐시 확인: 강제 갱신이 아니고 현재 시간대(정각 기준) 집계 데이터가 있으면 서버 재호출 없이 즉시 표시
+        if (!forceServerFetch) {
+          const cachedHourly = loadHourlyRankingCache();
+          if (cachedHourly && cachedHourly.data) {
+            lastRankingPayload = cachedHourly.data;
+            renderRankingFromData(cachedHourly.data);
+            if (showToastMsg) showToast('🏆 현재 시간대(정각 기준) 공식 집계 전적을 표시합니다.');
+            return;
+          }
+        }
+
         try {
           const headers = authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
-          const res = await apiFetch(`/api/ranking?gameId=${GAME_ID}&_t=${Date.now()}`, {
+          const hourKey = getCurrentHourBucketKey();
+          const res = await apiFetch(`/api/ranking?gameId=${GAME_ID}&hourBucket=${encodeURIComponent(hourKey)}&_t=${Date.now()}`, {
             headers,
             cache: 'no-store'
           });
@@ -1437,11 +1648,17 @@
           if (!res.ok) throw new Error(data.error || '랭킹 로드 실패');
 
           lastRankingPayload = data;
+          saveHourlyRankingCache(data);
           renderRankingFromData(data);
 
-          if (showToastMsg) showToast('🏆 최신 랭킹 정보를 불러왔습니다!');
+          if (showToastMsg) showToast('🏆 전체 서버 전적 현황을 최신 집계로 갱신했습니다!');
         } catch (err) {
-          // 오프라인이거나 서버 연결 대기 시에도 로컬 스냅샷 기반 랭킹 표시
+          const cachedHourly = loadHourlyRankingCache();
+          if (cachedHourly && cachedHourly.data) {
+            lastRankingPayload = cachedHourly.data;
+            renderRankingFromData(cachedHourly.data);
+            return;
+          }
           const snapMap = loadRankSnapshotsMap();
           const uniqueByMasked = new Map();
           Object.values(snapMap).forEach(entry => {
@@ -1463,24 +1680,39 @@
         }
       }
 
-      async function syncAndRefreshRanking(showToastMsg = false) {
-        if (authToken) {
+      async function syncAndRefreshRanking(showToastMsg = false, forceServerFetch = false) {
+        if (authToken && (hasUnsavedChanges || forceServerFetch)) {
           await syncSaveToServer(false);
         }
-        await fetchAndRenderRanking(showToastMsg);
+        await fetchAndRenderRanking(showToastMsg, forceServerFetch);
       }
 
-      setInterval(() => {
-        if (authToken && hasUnsavedChanges && !isSyncInFlight) {
-          syncSaveToServer(false);
+      // 매시 정각(1시간 주기) 도래 여부 체크 및 카운트다운 갱신
+      async function checkHourlyRankingRollover() {
+        updateNextHourlyCountdownUI();
+        const currentHourKey = getCurrentHourBucketKey();
+        if (lastAggregatedHourKey && lastAggregatedHourKey !== currentHourKey) {
+          // 정각이 되어 새 시간대로 넘어갈 때 로그인 유저는 최종 전적을 서버에 제출한 뒤 새 정각 집계를 로드
+          if (authToken) {
+            await syncSaveToServer(false);
+          }
+          await fetchAndRenderRanking(false, true);
         }
-      }, 5000);
+      }
 
+      // 1초마다 다음 정각 집계까지 남은 시간 카운트다운 표시 및 정각(1시간 주기) 도달 시 자동 집계 전환
       setInterval(() => {
         if (!document.hidden) {
-          fetchAndRenderRanking(false);
+          checkHourlyRankingRollover();
         }
-      }, 30000);
+      }, 1000);
+
+      // 개별 유저의 주기적 백그라운드 서버 저장은 서버 부하 완화를 위해 60초 주기로 여유 있게 수행 (주요 장비/지역/명예 변경 및 로그아웃/종료 시에는 즉시 저장)
+      setInterval(() => {
+        if (authToken && hasUnsavedChanges && !isSyncInFlight && !document.hidden) {
+          syncSaveToServer(false);
+        }
+      }, 60000);
 
       function updateAuthHeaderUI() {
         const userBadge = document.getElementById('userBadge');
@@ -1512,7 +1744,6 @@
           recordUserRankSnapshot(loggingOutUser, state);
         }
 
-        // 만료 로그아웃이 아닌 경우, 토큰을 지우기 직전에 반드시 서버에 최종 상태(무기, 마을, 명예, 파워)를 저장
         if (!expired && authToken) {
           await syncSaveToServer(false, true);
         }
@@ -1526,8 +1757,9 @@
         updateUI();
         if (lastRankingPayload) {
           renderRankingFromData(lastRankingPayload);
+        } else {
+          await fetchAndRenderRanking(false, false);
         }
-        await fetchAndRenderRanking(false);
         showToast(expired ? '로그인 정보가 만료되었습니다. 마지막 플레이 기록은 보존됩니다.' : '안전하게 저장 후 로그아웃되었습니다.');
       }
 
@@ -3535,7 +3767,7 @@
       });
 
       document.getElementById('refreshRankingBtn').addEventListener('click', () => {
-        syncAndRefreshRanking(true);
+        syncAndRefreshRanking(true, true);
       });
 
       canvasWrapper.addEventListener('pointerdown', (e) => {
@@ -3692,13 +3924,15 @@
           ownerUsername: fullPhoneId,
           updatedAt: Date.now()
         };
+        const encodedScore = encodeScoreWithMeta(state.power, state.honorLevel, state.currentRegionId, state.equippedWeaponId);
         const payload = isRegisterMode
           ? {
               username: fullPhoneId,
               password: pin,
               initialSaveData: registerInitialState,
               saveData: registerInitialState,
-              score: state.power,
+              score: encodedScore,
+              power: state.power,
               honorLevel: state.honorLevel,
               equippedWeaponId: state.equippedWeaponId,
               currentRegionId: state.currentRegionId,
@@ -3731,12 +3965,17 @@
             const rawLoginSave = data?.saveData ?? data?.save_data ?? data?.data;
             if (rawLoginSave) {
               const parsedSave = typeof rawLoginSave === 'string' ? JSON.parse(rawLoginSave) : rawLoginSave;
+              const decoded = decodeScoreMeta(data?.score || parsedSave?.power || 1);
               const serverStateObj = {
                 ...(parsedSave || {}),
-                power: Math.max(Number(parsedSave?.power || 1), Number(data?.score || data?.power || 1)),
-                honorLevel: Math.max(Number(parsedSave?.honorLevel ?? parsedSave?.honor_level ?? 0), Number(data?.honorLevel ?? data?.honor_level ?? 0)),
-                equippedWeaponId: parsedSave?.equippedWeaponId || parsedSave?.equipped_weapon_id || data?.equippedWeaponId || data?.equipped_weapon_id || 'wooden_sword',
-                currentRegionId: parsedSave?.currentRegionId || parsedSave?.current_region_id || data?.currentRegionId || data?.current_region_id || 'village',
+                power: Math.max(Number(parsedSave?.power || 1), decoded.power),
+                honorLevel: Math.max(
+                  Number(parsedSave?.honorLevel ?? parsedSave?.honor_level ?? 0),
+                  Number(data?.honorLevel ?? data?.honor_level ?? 0),
+                  decoded.hasEncodedMeta ? decoded.honorLevel : 0
+                ),
+                equippedWeaponId: parsedSave?.equippedWeaponId || parsedSave?.equipped_weapon_id || data?.equippedWeaponId || data?.equipped_weapon_id || (decoded.hasEncodedMeta ? decoded.weaponId : 'wooden_sword'),
+                currentRegionId: parsedSave?.currentRegionId || parsedSave?.current_region_id || data?.currentRegionId || data?.current_region_id || (decoded.hasEncodedMeta ? decoded.regionId : 'village'),
                 isVip: Boolean(data?.isVip || parsedSave?.isVip)
               };
               const accountBackup = getAccountSavedState(currentUsername);
@@ -3746,7 +3985,6 @@
               recordUserRankSnapshot(currentUsername, state);
               await syncSaveToServer(false);
             } else {
-              // /api/login 응답에 saveData가 없는 경우 반드시 /api/load를 먼저 조회하여 기본 상태로 덮어쓰는 버그 방지
               await loadFromServer();
             }
           } else {
@@ -3760,7 +3998,7 @@
 
           updateAuthHeaderUI();
           updateUI();
-          await fetchAndRenderRanking(false);
+          await fetchAndRenderRanking(false, true);
           if (state.bgmEnabled) startBGM();
 
           authModal.classList.add('hidden');
@@ -3837,7 +4075,6 @@
       async function initGame() {
         resizeCanvas();
 
-        // 실제 웹 서버 호스팅 환경일 때만 ./icon.png 로드 시도 (샌드박스/프리뷰에서는 인라인 SVG 아이콘 유지)
         if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
           const iconImg = document.getElementById('shortcutIconImg');
           if (iconImg && !window.location.hostname.includes('usercontent')) {
@@ -3847,7 +4084,6 @@
           }
         }
 
-        // 토스페이먼츠 VIP 결제 완료 후 리다이렉트 파라미터 감지
         try {
           const params = new URLSearchParams(window.location.search);
           if (params.get('paymentKey') && params.get('orderId') && !state.isVip) {
@@ -3863,12 +4099,14 @@
 
         updateAuthHeaderUI();
         updateUI();
+        updateNextHourlyCountdownUI();
         requestAnimationFrame(gameLoop);
 
         if (authToken) {
           await loadFromServer();
         }
-        fetchAndRenderRanking(false);
+        // 비로그인/첫 접속자도 즉시 전체 서버 전적을 볼 수 있도록 로드 (동일 시간대에는 1시간 캐시 우선 활용, 최초 1회 서버 조회)
+        await fetchAndRenderRanking(false, true);
         setTimeout(() => {
           if (state.bgmEnabled) startBGM();
         }, 800);
